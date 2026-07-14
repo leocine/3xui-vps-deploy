@@ -1,0 +1,7 @@
+interface:
+  display_name: "3x-ui VPS Deploy"
+  short_description: "一键部署 3x-ui 面板与常用入站"
+  brand_color: "#2563EB"
+  default_prompt: "Use $3xui-vps-deploy to deploy a new 3x-ui VPS with Cloudflare DNS checks, HTTPS, optional inbounds, and tuning."
+policy:
+  allow_implicit_invocation: true

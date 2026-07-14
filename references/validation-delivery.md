@@ -1,0 +1,103 @@
+# 安装后验证与交付
+
+部署完成后必须验证，不要只报告“命令已执行”。
+
+## 基础验证
+
+```bash
+systemctl is-active x-ui
+x-ui settings
+ss -lntup
+```
+
+确认：
+
+- `x-ui` 是 `active`。
+- 面板端口正在监听。
+- 面板 URL、用户名、密码、端口、web base path 可从安装结果或配置中读取。
+- HTTPS 证书文件存在。
+- Clash/Mihomo 订阅已开启。
+- IPv6 已关闭或至少系统优先 IPv4。
+- 调优脚本 1、2、3、4 已执行。
+
+## Clash/Mihomo 验证
+
+```bash
+sqlite3 /etc/x-ui/x-ui.db "SELECT key,value FROM settings WHERE key IN ('subClashEnable','subClashPath');"
+```
+
+期望：
+
+```text
+subClashEnable|true
+subClashPath|/clash/
+```
+
+## 入站验证
+
+如果创建了入站，确认：
+
+- 4 个入站都启用。
+- 只有一个逻辑客户端 `admin`，没有 `admin-xhttp`、`admin-vless`、`admin-hy2`、`admin01` 这类拆分客户端。
+- 4 个入站都关联到 `admin`；3 个 VLESS 入站使用同一个 `admin` 客户端 UUID。
+- HY2 有随机 auth。
+- 443 入站监听 `443/tcp`。
+- 随机 VLESS 入站监听对应 TCP 端口。
+- HY2 主端口监听 UDP。
+- HY2 端口跳跃 `48000-50000` 已写入 nftables。
+
+检查示例：
+
+```bash
+ss -lntup | grep -E ':(443|<随机TCP端口>|<XHTTP端口>)'
+ss -lunp | grep '<HY2主端口>'
+nft list ruleset
+```
+
+## 真实连通性验收
+
+入站服务器侧检查通过后，必须读取并执行 `connectivity-test.md`。
+
+最终逐项列出以下状态，不能合并成笼统的“节点正常”：
+
+- VLESS TCP Reality 443：通过 / 失败 / 待外部实测。
+- VLESS TCP Reality 随机端口：通过 / 失败 / 待外部实测。
+- VLESS XHTTP Reality：通过 / 失败 / 待外部实测。
+- HY2 主端口：通过 / 失败 / 待外部实测。
+- HY2 跳跃端口 A、B：通过 / 失败 / 待外部实测。
+
+只有协议握手完成并通过该代理取得 HTTPS 测试响应才标记为“通过”。若没有 VPS 外独立测试环境，明确说明尚待一次客户端实测，不得宣称全部可用。
+
+## 最终交付格式
+
+最后必须用简洁清单输出：
+
+```text
+部署完成。
+
+面板地址:
+面板用户名:
+面板密码:
+面板端口:
+面板路径:
+证书状态:
+Clash/Mihomo 订阅:
+IPv6 状态:
+BBR/调优状态:
+本机防火墙:
+
+入站创建:
+- 是否创建 4 个入站
+- 如已创建，列出每个入站名称、协议、端口、用途、客户端 email
+- 如已创建，逐项列出真实连通性测试结果；HY2 必须分别列出主端口和两个跳跃端口结果
+
+订阅获取:
+- 按 subscription.md 输出，重点标记 Clash Verge 的特殊复制方式
+
+安全提醒:
+- 立刻修改 VPS root 密码
+- 保存面板地址、用户名、密码
+- 如果端口外部不通，去 VPS 商家安全组放行端口
+```
+
+不要在最终报告里重复输出 SSH 临时密码。
