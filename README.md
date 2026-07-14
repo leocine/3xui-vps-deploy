@@ -15,22 +15,20 @@
 
 ## 安装
 
-这是私有仓库。首次安装前，把你的 GitHub 用户名发给 Skill 的提供者，请他邀请你访问仓库；在 GitHub 的通知或邮件里接受邀请后，再继续下面的安装步骤。
-
-然后，新开一个 Codex 任务，把这段话直接发给 Codex：
+新开一个 Codex 任务，把这段话直接发给 Codex：
 
 ```text
-请使用 skill-installer 从 GitHub 私有仓库 leocine/3xui-vps-deploy 安装根目录的 3xui-vps-deploy Skill，使用最新版。若需要 GitHub 权限，请先引导我完成 GitHub 授权。安装完成后提醒我开启一个新任务再使用。
+请使用 skill-installer 从 GitHub 仓库 leocine/3xui-vps-deploy 安装根目录的 3xui-vps-deploy Skill，使用最新版。安装完成后提醒我开启一个新任务再使用。
 ```
 
-也可以在已具备 GitHub 私有仓库访问权限的终端中执行：
+也可以在终端中执行：
 
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo leocine/3xui-vps-deploy \
   --path . \
   --name 3xui-vps-deploy \
-  --ref v1.0.3
+  --ref v1.0.4
 ```
 
 安装完成后，开启一个新的 Codex 任务，然后说：
@@ -43,5 +41,5 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-- 推荐使用固定标签 `v1.0.3`，以便每次安装得到可复现版本。
+- 推荐使用固定标签 `v1.0.4`，以便每次安装得到可复现版本。
 - 需要获取后续更新时，将上面命令中的 `--ref` 替换为新的版本标签，并先移除旧的本地 Skill 目录后重新安装。
