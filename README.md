@@ -26,7 +26,7 @@
 
 不要把 VPS 密码、SSH 私钥、Reality 私钥或其他密钥提交到此仓库。
 
-## 安装
+## 安装 Skill
 
 新开一个 Codex 任务，把这段话直接发给 Codex：
 
@@ -34,7 +34,11 @@
 请使用 skill-installer 从 GitHub 仓库 leocine/3xui-vps-deploy 安装根目录的 3xui-vps-deploy Skill，使用最新版。安装完成后提醒我开启一个新任务再使用。
 ```
 
-安装完成后，开启一个新的 Codex 任务，然后说：
+安装完成后，开启一个新的 Codex 任务。
+
+## 使用 Skill
+
+在新的 Codex 任务中说：
 
 ```text
 帮我部署一台新的 3x-ui VPS。
@@ -44,4 +48,4 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.0.6`。
+当前稳定版本：`v1.0.7`。
