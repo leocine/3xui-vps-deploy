@@ -40,7 +40,7 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 2. **注册并接入 Cloudflare**：确认是否已有 Cloudflare 账号。没有就先注册；有域名后，把域名添加到 Cloudflare，再将 Cloudflare 给出的两条 nameserver 填到买域名的网站，等 Cloudflare 显示域名已接入。
 3. **设置域名解析**：创建一个面板子域名的 A 记录，例如 `panel.example.com`，让它指向 VPS IP。代理状态必须设为 `DNS only` / 灰云；如果有同名 AAAA 记录，也会提示删除。Codex 会验证公网解析生效后再继续。
 4. **连接 VPS**：收集 VPS IP、SSH 端口、系统和面板域名。macOS 上会优先打开一个只保存在本机的文件填写临时 root 密码，避免把密码发到对话里。
-5. **安装 3x-ui 面板**：先检查系统和端口，再根据 3x-ui 官方最新文档安装面板、申请 HTTPS 证书、开启 Clash/Mihomo 订阅、处理 VPS 本机防火墙，并关闭 IPv6。
+5. **安装 3x-ui 面板**：先检查系统和端口，再根据 3x-ui 官方最新文档安装面板；安装后会把 Xray Core 固定到 `26.6.27`，再申请 HTTPS 证书、开启 Clash/Mihomo 订阅、处理 VPS 本机防火墙，并关闭 IPv6。
 6. **可选的一键入站**：你可以自己在面板中创建入站，也可以让 Codex 自动创建 4 个常用节点：443 VLESS TCP Reality、随机端口 VLESS TCP Reality、随机端口 VLESS XHTTP Reality，以及带 `48000-50000` UDP 端口跳跃的 HY2。自动模式只建一个客户端 `admin`，四个节点都会归到它下面。
 7. **自动调优**：无论你是否创建入站，都会使用 VPSing 的 TCP/BBR 调优脚本（`tcp.vpsing.de`），自动完成 IPv4 优先、BBR + FQ、内核调优和网卡多队列这 4 步。
 8. **检查是否真的可用**：会检查面板、证书、端口、端口跳跃和订阅。创建节点时，还会用真实的代理访问测试来确认连接成功，不会只看端口是否打开；如果 VPS 商家安全组挡住了端口，会告诉你去商家后台放行。
@@ -48,4 +48,4 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.0.10`。
+当前稳定版本：`v1.0.11`。
