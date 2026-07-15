@@ -54,6 +54,28 @@ ss -lunp | grep '<HY2主端口>'
 nft list ruleset
 ```
 
+## 运行配置一致性验证
+
+3x-ui 面板数据库和 Xray 实际运行配置必须一致。尤其在修改 UUID、flow、Reality 密钥、SNI/serverNames、shortId 后，不能只看面板或订阅。
+
+检查对应入站的关键字段是否同时出现在数据库和实际配置中：
+
+```bash
+sqlite3 /etc/x-ui/x-ui.db "select settings,stream_settings from inbounds where port=<端口>;" | grep -oE '<客户端email>|<UUID前缀>|xtls-rprx-vision|<serverName>|<shortId>'
+grep -oE '<客户端email>|<UUID前缀>|xtls-rprx-vision|<serverName>|<shortId>' /usr/local/x-ui/bin/config.json
+```
+
+如果数据库是新配置，但 `/usr/local/x-ui/bin/config.json` 仍是旧 UUID、旧 Reality 目标或旧 flow，执行：
+
+```bash
+systemctl restart x-ui
+sleep 3
+systemctl is-active x-ui
+ss -lntup | grep -E ':<端口>\b'
+```
+
+然后再次对比 `config.json`。只有确认 Xray 实际运行配置已加载最新字段，才继续做客户端连通性测试。
+
 ## 真实连通性验收
 
 入站服务器侧检查通过后，必须读取并执行 `connectivity-test.md`。

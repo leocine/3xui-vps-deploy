@@ -37,6 +37,7 @@ timeout 30 tcpdump -ni any 'tcp port <目标TCP端口> or udp port <HY2主端口
 
 - 没有入站数据包：优先检查客户端网络、域名解析、VPS 商家安全组或商家 UDP 限制。
 - 有 TCP/UDP 入站包但握手或代理请求失败：检查对应入站参数、Reality/TLS 证书、客户端版本和防火墙/NAT 规则。
+- 如果 3x-ui 面板或订阅里看到的是新 UUID / Reality / flow，但客户端超时，且旧客户端或 v2rayN 仍可用，优先检查“数据库配置与 Xray 实际运行配置是否一致”。对比 `/etc/x-ui/x-ui.db` 中对应入站和 `/usr/local/x-ui/bin/config.json` 中同端口入站的客户端 UUID、flow、Reality `serverNames`、`publicKey`、`shortIds`。若不一致，执行 `systemctl restart x-ui`，确认 `config.json` 已重新生成并包含最新字段后再重测。
 - HY2 主端口通过但跳跃端口失败：检查 UDP `48000-50000` 的商家安全组、本机防火墙和 `xui_hy2_nat` nftables 规则。
 
 ## 判定规则
