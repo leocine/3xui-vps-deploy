@@ -49,7 +49,3 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 ## 版本
 
 当前稳定版本：`v1.0.9`。
-
-## 更新记录
-
-每次同步 GitHub 时，都会在 [UPDATE_LOG.md](UPDATE_LOG.md) 记录本次更新内容。
