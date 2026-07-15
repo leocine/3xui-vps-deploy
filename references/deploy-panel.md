@@ -29,6 +29,27 @@ XUI_NONINTERACTIVE=1 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/
 6. 从安装输出或 `/etc/x-ui/install-result.env` 读取面板 URL、用户名、密码、端口、web base path。
 7. 确认随机端口、随机用户名、随机密码、随机路径已生效。
 
+## 固定 Xray Core 版本
+
+3x-ui `3.5.0` 默认或更新后可能使用 Xray Core `26.7.11`。已知该版本可能导致配置正确的 VLESS Reality 节点在部分客户端不通。安装 3x-ui 后，必须把 Xray Core 固定到 `26.6.27`。
+
+优先在 3x-ui 面板中操作：
+
+1. 打开面板的 Xray / Core 版本管理。
+2. 将 Xray Core 版本选择为 `26.6.27`。
+3. 应用后重启 `x-ui`。
+
+如果通过 CLI 或脚本切换，执行前先确认当前 `x-ui` 版本支持对应命令；不要盲目覆盖二进制。切换后验证：
+
+```bash
+/usr/local/x-ui/bin/xray-linux-amd64 version | head -1
+systemctl restart x-ui
+sleep 3
+systemctl is-active x-ui
+```
+
+期望第一行包含 `Xray 26.6.27`。如果仍是 `26.7.11`，不要继续创建或交付 VLESS Reality 入站，先回到面板切换核心版本。
+
 ## 配置 HTTPS
 
 优先参考官方文档和 `x-ui` 菜单的 SSL 管理功能申请/设置证书。失败时再安装 `certbot`，用 standalone 方式申请 Let's Encrypt。
