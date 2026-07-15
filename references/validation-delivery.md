@@ -8,6 +8,7 @@
 systemctl is-active x-ui
 x-ui settings
 ss -lntup
+/usr/local/x-ui/bin/xray-linux-amd64 version | head -1
 ```
 
 确认：
@@ -17,6 +18,7 @@ ss -lntup
 - 面板 URL、用户名、密码、端口、web base path 可从安装结果或配置中读取。
 - HTTPS 证书文件存在。
 - Clash/Mihomo 订阅已开启。
+- Xray Core 版本是 `26.6.27`，不要交付仍使用 `26.7.11` 的 VLESS Reality 配置。
 - IPv6 已关闭或至少系统优先 IPv4。
 - 调优脚本 1、2、3、4 已执行。
 
