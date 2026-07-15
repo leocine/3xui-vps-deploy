@@ -29,6 +29,12 @@ XUI_NONINTERACTIVE=1 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/
 6. 从安装输出或 `/etc/x-ui/install-result.env` 读取面板 URL、用户名、密码、端口、web base path。
 7. 确认随机端口、随机用户名、随机密码、随机路径已生效。
 
+### 3x-ui 3.5.0 实测注意
+
+- `XUI_NONINTERACTIVE=1` 会自动生成随机端口、用户名、密码、web base path，并写入 `/etc/x-ui/install-result.env`，但当前版本可能默认跳过 SSL。不要因此交付 HTTP 面板；安装后必须单独申请证书并写入面板 HTTPS 配置。
+- 3x-ui 3.5.0 登录接口带 CSRF，直接脚本 POST `/login` 很容易返回 `403`。自动化调用 `/panel/api/*` 时优先使用 `/etc/x-ui/install-result.env` 里的 `XUI_API_TOKEN`，请求头使用 `Authorization: Bearer <token>`。
+- 用本机或外部环境验证面板时，以 `GET https://<面板域名>:<端口>/<webBasePath>/` 返回 `200` 为准。`HEAD` 请求可能返回 `404`；在 VPS 自己访问公网域名也可能受发夹 NAT/回环影响出现 TLS 错误，不能单独判定面板不可用。
+
 ## 固定 Xray Core 版本
 
 3x-ui `3.5.0` 默认或更新后可能使用 Xray Core `26.7.11`。已知该版本可能导致配置正确的 VLESS Reality 节点在部分客户端不通。安装 3x-ui 后，必须把 Xray Core 固定到 `26.6.27`。
@@ -50,6 +56,8 @@ systemctl is-active x-ui
 
 期望第一行包含 `Xray 26.6.27`。如果仍是 `26.7.11`，不要继续创建或交付 VLESS Reality 入站，先回到面板切换核心版本。
 
+如果面板没有可用的 Core 版本切换入口，可从 Xray-core 官方 Release 下载 `v26.6.27` 对应架构包，先备份现有 `/usr/local/x-ui/bin/xray-linux-amd64`，再仅替换该二进制。`xray x25519` 在 `26.6.27` 的输出字段是 `PrivateKey:` 和 `Password (PublicKey):`，脚本解析 Reality 密钥时要兼容这个格式。
+
 ## 配置 HTTPS
 
 优先参考官方文档和 `x-ui` 菜单的 SSL 管理功能申请/设置证书。失败时再安装 `certbot`，用 standalone 方式申请 Let's Encrypt。
@@ -60,6 +68,15 @@ systemctl is-active x-ui
 /etc/letsencrypt/live/<面板域名>/fullchain.pem
 /etc/letsencrypt/live/<面板域名>/privkey.pem
 ```
+
+写入 3x-ui 3.5.0 面板 HTTPS 配置时，settings 表使用：
+
+```text
+webCertFile=/etc/letsencrypt/live/<面板域名>/fullchain.pem
+webKeyFile=/etc/letsencrypt/live/<面板域名>/privkey.pem
+```
+
+写入前备份 `/etc/x-ui/x-ui.db`，写入后重启 `x-ui` 并验证 `systemctl is-active x-ui` 与外部 `GET` 面板 URL。
 
 ## 开启 Clash/Mihomo 订阅
 
