@@ -1,9 +1,20 @@
 ---
 name: 3xui-vps-deploy
-description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板：先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装面板、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP/HY2 入站、配置 HY2 端口跳跃和系统网络调优。
+description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板，或在已安装 3x-ui 的 VPS 上配置每月自动重置流量。部署场景会先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装面板、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP/HY2 入站、配置 HY2 端口跳跃和系统网络调优。自动重置场景会只配置 3x-ui inbound/client 流量统计重置脚本、日志和 cron，不修改节点配置。
 ---
 
 # 3x-ui VPS Deploy
+
+## 自动流量重置请求
+
+用户要求“每月自动重置流量 / VPS 流量周期重置 / 3x-ui 重置 inbound 和 client 流量统计”时，不走新 VPS 部署的域名门禁，也不要安装或升级 3x-ui。读取 `references/reset-traffic.md`，只完成该文档中的只读检查、重置日询问、API Token 配置、脚本安装、cron 配置和测试验证。
+
+自动重置任务的硬限制：
+
+- 只允许重置流量统计。
+- 不得重装、升级或重配 3x-ui。
+- 不得修改入站、客户端、节点参数、Xray、证书、防火墙、SSH 或系统网络。
+- 不得保存或输出 VPS root 密码、SSH 私钥、面板密码、API Token。
 
 ## 必须先做的门禁
 
