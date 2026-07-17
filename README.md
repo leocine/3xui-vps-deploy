@@ -32,6 +32,29 @@
 
 Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成部署。macOS 环境会优先使用本机临时凭据文件，避免在对话中输入 VPS 密码。
 
+## 目录结构
+
+```text
+3xui-vps-deploy/
+├── SKILL.md                         # Skill 入口：触发条件、执行顺序和安全规则
+├── README.md                        # 本文件：安装方式、使用说明和目录说明
+├── CHANGELOG.md                     # 版本变更摘要；正式发布说明以 GitHub Release 为准
+├── agents/
+│   └── openai.yaml                  # Codex UI 中展示的名称、简介和默认提示
+├── scripts/
+│   └── create-local-credentials.sh  # macOS 本机凭据文件生成器，避免在聊天中输入 SSH 密码
+└── references/
+    ├── cloudflare-dns.md            # 域名购买、Cloudflare 接入、A/AAAA 记录和灰云配置
+    ├── preflight-recovery.md        # SSH 后的系统预检、DNS 核验和失败恢复
+    ├── deploy-panel.md              # 3x-ui 安装、HTTPS、订阅开关、Xray Core 固定和防火墙处理
+    ├── inbounds.md                  # VLESS Reality、XHTTP Reality、HY2 入站创建规则
+    ├── tuning.md                    # IPv4 优先、BBR/FQ、内核参数和网卡队列调优
+    ├── connectivity-test.md         # 真实代理连通性测试、抓包判断和故障分类
+    ├── validation-delivery.md       # 安装后验收清单、运行配置一致性检查和交付格式
+    ├── subscription.md              # 订阅获取方式，尤其 Clash/Mihomo/Clash Verge 的导入注意
+    └── local-credentials.md         # 本机凭据文件的创建、权限和安全读取规范
+```
+
 ## 部署流程
 
 开始后，Codex 会按下面的顺序带你完成。需要你自己在网站上操作的地方，它会停下来说明下一步；其余检查、安装和测试会自动完成。
@@ -48,7 +71,11 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.0.12`。
+当前稳定版本：`v1.0.13`。
+
+### v1.0.13 更新
+
+- README 新增“目录结构”模块，说明 Skill 入口、脚本、参考文档和 UI 元数据各自用途。
 
 ### v1.0.12 更新
 
