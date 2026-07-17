@@ -1,7 +1,7 @@
 interface:
   display_name: "3x-ui VPS Deploy"
-  short_description: "一键部署 3x-ui 面板与常用入站"
+  short_description: "部署 3x-ui 面板，或配置每月流量自动重置"
   brand_color: "#2563EB"
-  default_prompt: "Use $3xui-vps-deploy to deploy a new 3x-ui VPS with Cloudflare DNS checks, HTTPS, optional inbounds, and tuning."
+  default_prompt: "Use $3xui-vps-deploy to deploy a new 3x-ui VPS, or configure monthly inbound/client traffic reset on an existing 3x-ui VPS."
 policy:
   allow_implicit_invocation: true

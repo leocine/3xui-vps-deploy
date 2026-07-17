@@ -32,6 +32,14 @@
 
 Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成部署。macOS 环境会优先使用本机临时凭据文件，避免在对话中输入 VPS 密码。
 
+如果只是给已安装 3x-ui 的 VPS 配置每月流量自动重置，可以说：
+
+```text
+帮我在当前 VPS 上配置 3x-ui 每月自动重置流量。
+```
+
+这个模式只会配置 inbound/client 流量统计重置脚本、日志和 cron，不会修改节点配置、Xray 配置、防火墙、SSH 或系统网络。
+
 ## 目录结构
 
 ```text
@@ -42,7 +50,8 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 ├── agents/
 │   └── openai.yaml                  # Codex UI 中展示的名称、简介和默认提示
 ├── scripts/
-│   └── create-local-credentials.sh  # macOS 本机凭据文件生成器，避免在聊天中输入 SSH 密码
+│   ├── create-local-credentials.sh  # macOS 本机凭据文件生成器，避免在聊天中输入 SSH 密码
+│   └── 3xui-reset-traffic.sh        # VPS 端每月流量重置脚本模板，读取 API Token 配置执行重置
 └── references/
     ├── cloudflare-dns.md            # 域名购买、Cloudflare 接入、A/AAAA 记录和灰云配置
     ├── preflight-recovery.md        # SSH 后的系统预检、DNS 核验和失败恢复
@@ -52,6 +61,7 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
     ├── connectivity-test.md         # 真实代理连通性测试、抓包判断和故障分类
     ├── validation-delivery.md       # 安装后验收清单、运行配置一致性检查和交付格式
     ├── subscription.md              # 订阅获取方式，尤其 Clash/Mihomo/Clash Verge 的导入注意
+    ├── reset-traffic.md             # 已安装 3x-ui 的每月流量自动重置配置流程
     └── local-credentials.md         # 本机凭据文件的创建、权限和安全读取规范
 ```
 
@@ -71,7 +81,13 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.0.13`。
+当前稳定版本：`v1.0.14`。
+
+### v1.0.14 更新
+
+- 新增已安装 3x-ui VPS 的每月自动重置流量流程。
+- 新增 VPS 端脚本模板 `scripts/3xui-reset-traffic.sh`，通过 API Token 重置所有 inbound 和 client 流量统计。
+- 新增 `references/reset-traffic.md`，覆盖只读预检、重置日期询问、API 兼容确认、cron 配置、日志和最终输出要求。
 
 ### v1.0.13 更新
 

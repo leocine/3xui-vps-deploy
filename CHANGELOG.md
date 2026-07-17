@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.14
+
+- Added a monthly 3x-ui traffic reset workflow for already-installed VPS instances.
+- Added `scripts/3xui-reset-traffic.sh`, a VPS-side script template that reads an API Token from a 600-permission config file and resets inbound/client traffic through the current 3x-ui API.
+- Added `references/reset-traffic.md` covering read-only preflight checks, reset date collection, API compatibility checks, cron setup, logging, testing, and safety limits.
+- Updated README usage and directory structure for the new reset workflow.
+
+## v1.0.13
+
+- Added a README directory structure section explaining `SKILL.md`, `agents/`, `scripts/`, and `references/`.
+- Bumped the documented stable version to `v1.0.13`.
+
 ## v1.0.12
 
 - Added 3x-ui 3.5.0 automation notes from a real VMISS deployment.
