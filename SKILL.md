@@ -46,7 +46,10 @@ SSH 端口:
 SSH 用户名，默认 root:
 系统，Debian 或 Ubuntu:
 面板域名:
+每月流量重置日，例如 17 或 22:
 ```
+
+默认在流量重置日的北京时间 `08:05` 执行 3x-ui 流量统计重置。若用户不确定重置日，先让用户查看 VPS 商家流量周期；不要自行假设日期。
 
 在 macOS 上，读取 `references/local-credentials.md`：自动创建并打开本机凭据文件，让用户只填写临时 root 密码、保存并回复“已保存”。优先读取这个文件，不要在聊天中索取密码。
 
@@ -64,9 +67,10 @@ SSH 用户名，默认 root:
    - 是：按 `references/inbounds.md` 创建 4 个入站。
    - 否：跳过入站，直接调优。
 4. 无论是否创建入站，都按 `references/tuning.md` 执行网络调优。
-5. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
-6. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。
-7. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式。
+5. 默认读取 `references/reset-traffic.md`，按部署前收集的每月流量重置日配置 3x-ui 自动重置 inbound/client 流量统计。新部署场景优先复用 `/etc/x-ui/install-result.env` 中的 `XUI_API_TOKEN`，不要要求用户在聊天中提供面板密码或 API Token。
+6. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
+7. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。
+8. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式。
 
 ## 安全规则
 

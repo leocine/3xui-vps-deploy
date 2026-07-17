@@ -1,6 +1,6 @@
 # 3x-ui 每月流量自动重置
 
-用于已安装 3x-ui 的 VPS。目标是每月自动重置所有入站和客户端的流量统计，只处理重置脚本、API Token 配置、日志和 cron；不得修改节点配置、Xray 配置、证书、防火墙、SSH、网络调优或系统服务结构。
+用于配置 3x-ui 每月自动重置所有入站和客户端的流量统计。新 VPS 部署时默认配置；已安装 3x-ui 的 VPS 也可以单独执行。只处理重置脚本、API Token 配置、日志和 cron；不得修改节点配置、Xray 配置、证书、防火墙、SSH、网络调优或系统服务结构。
 
 ## 先做只读检查
 
@@ -28,7 +28,7 @@ command -v crontab || true
 
 ## 修改前询问
 
-执行任何写入前，必须询问：
+执行任何写入前，必须确认重置日。新 VPS 部署场景使用部署前已收集的重置日；如果尚未收集，必须询问：
 
 ```text
 这台 VPS 每月流量重置日是几号？例如 17 或 22。
@@ -36,6 +36,17 @@ command -v crontab || true
 ```
 
 默认时间是 `Asia/Shanghai 08:05`。不要固定日期；每台 VPS 按用户给出的流量周期配置。
+
+## 新部署默认配置
+
+新 VPS 部署时必须默认配置本流程，不要等用户额外提出。使用部署阶段生成的信息：
+
+- 面板 URL、端口和 web base path：优先读取 `/etc/x-ui/install-result.env` 或 `x-ui settings`。
+- API Token：优先读取 `/etc/x-ui/install-result.env` 中的 `XUI_API_TOKEN`。
+- 重置日：使用部署前向用户收集的每月流量重置日。
+- 执行时间：默认北京时间 `08:05`，按 VPS 当前系统时区换算成 cron。
+
+如果 `/etc/x-ui/install-result.env` 没有 `XUI_API_TOKEN`，不要把面板密码写入脚本。先尝试从当前 3x-ui 版本支持的面板/API Token 管理方式创建或读取专用 token；无法自动完成时，停下让用户在面板中创建 API Token，再继续写入 `/etc/3xui-reset-traffic.env`。
 
 ## API 兼容确认
 
@@ -59,7 +70,7 @@ https://docs.sanaei.dev/docs/
 
 ## 配置 API Token
 
-让用户在 3x-ui 面板中创建一个只用于自动重置的 API Token。不要让用户把面板密码发到聊天里。
+已安装 VPS 单独配置时，让用户在 3x-ui 面板中创建一个只用于自动重置的 API Token。新部署场景优先复用安装结果里的 `XUI_API_TOKEN`。不要让用户把面板密码发到聊天里。
 
 在 VPS 上创建独立配置文件：
 

@@ -19,6 +19,7 @@ ss -lntup
 - HTTPS 证书文件存在。
 - Clash/Mihomo 订阅已开启。
 - Xray Core 版本是 `26.6.27`，不要交付仍使用 `26.7.11` 的 VLESS Reality 配置。
+- 每月流量自动重置已配置：脚本存在、配置文件权限为 `600`、日志路径可写、root crontab 中有 `/usr/local/bin/3xui-reset-traffic.sh`。
 - IPv6 已关闭或至少系统优先 IPv4。
 - 调优脚本 1、2、3、4 已执行。
 
@@ -34,6 +35,25 @@ sqlite3 /etc/x-ui/x-ui.db "SELECT key,value FROM settings WHERE key IN ('subClas
 subClashEnable|true
 subClashPath|/clash/
 ```
+
+## 流量自动重置验证
+
+新 VPS 部署默认必须配置每月流量自动重置。检查：
+
+```bash
+test -x /usr/local/bin/3xui-reset-traffic.sh
+stat -c '%a %U %G %n' /etc/3xui-reset-traffic.env
+crontab -l | grep '/usr/local/bin/3xui-reset-traffic.sh'
+tail -n 20 /var/log/3xui-reset-traffic.log 2>/dev/null || true
+```
+
+确认：
+
+- `/usr/local/bin/3xui-reset-traffic.sh` 存在且可执行。
+- `/etc/3xui-reset-traffic.env` 权限是 `600`。
+- cron 日期等于用户提供的 VPS 每月流量重置日。
+- cron 时间已按 VPS 当前系统时区从北京时间 `08:05` 换算。
+- 最终报告不得输出 API Token。
 
 ## 入站验证
 
@@ -120,6 +140,12 @@ Clash/Mihomo 订阅:
 IPv6 状态:
 BBR/调优状态:
 本机防火墙:
+流量自动重置:
+- 重置日:
+- 执行时间:
+- 脚本路径:
+- cron:
+- 日志路径:
 
 入站创建:
 - 是否创建 4 个入站

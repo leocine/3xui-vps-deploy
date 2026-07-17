@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.15
+
+- New VPS deployments now collect the monthly traffic reset day and configure the 3x-ui traffic reset script by default.
+- Deployment validation now checks the reset script, 600-permission config file, cron entry, and log path.
+- README no longer lists every version's update details; detailed update notes live in GitHub Releases.
+
 ## v1.0.14
 
 - Added a monthly 3x-ui traffic reset workflow for already-installed VPS instances.
