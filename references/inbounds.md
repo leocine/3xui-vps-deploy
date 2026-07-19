@@ -140,6 +140,8 @@ Password (PublicKey): <public>
 
 必须在 VPS 上配置 UDP `48000-50000` 转发到 HY2 主端口。优先 nftables：
 
+端口跳跃必须同时满足“运行时生效”和“重启后可恢复”。严禁只执行一次性的 `nft add rule` 或 `iptables -t nat -A ...` 后就交付；这类规则会在 VPS 重启、宿主机维护或网络服务重载后消失，而订阅仍会继续下发 `mport`，表现为 HY2 主端口可用、跳跃节点全部超时。
+
 ```text
 table ip xui_hy2_nat {
   chain prerouting {
@@ -154,11 +156,33 @@ table ip xui_hy2_nat {
 ```bash
 cp /etc/nftables.conf /etc/nftables.conf.bak.hy2 2>/dev/null || true
 systemctl enable --now nftables
+nft -c -f /etc/nftables.conf
 nft -f /etc/nftables.conf
 nft list ruleset
+systemctl is-enabled nftables
+systemctl is-active nftables
 ```
 
 不要使用 `flush ruleset`，不要覆盖用户已有防火墙规则。若 `/etc/nftables.conf` 已有内容，把 `table ip xui_hy2_nat` 合并进去；若文件不存在或为空，只写入 `table ip xui_hy2_nat` 这张表的最小配置。
+
+如果现有系统已经使用 `iptables-persistent`，不要再混用另一套独立规则；使用幂等检查添加规则并保存：
+
+```bash
+iptables -t nat -C PREROUTING -p udp --dport 48000:50000 \
+  -j REDIRECT --to-ports <HY2主端口> 2>/dev/null || \
+iptables -t nat -A PREROUTING -p udp --dport 48000:50000 \
+  -j REDIRECT --to-ports <HY2主端口>
+
+systemctl enable netfilter-persistent
+netfilter-persistent save
+iptables -t nat -S PREROUTING | grep '48000:50000'
+grep '48000:50000' /etc/iptables/rules.v4
+systemctl is-enabled netfilter-persistent
+```
+
+持久化验收必须至少做一次规则重载测试：先确认 SSH 恢复通道和当前防火墙已完整保存，再 reload 对应服务，随后重新检查跳跃规则。不能只检查保存文件，也不能只检查当前内存规则。生产机不需要为了验收主动重启整台 VPS。
+
+最终还要从 VPS 外向至少两个随机跳跃端口进行真实 HY2 握手和代理 HTTPS 请求；普通 UDP 探测包只能证明 NAT 计数命中，不能代替协议连通性测试。
 
 最后重启 x-ui，检查端口监听、nftables 规则和 x-ui 状态。
 

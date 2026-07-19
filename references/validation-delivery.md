@@ -67,7 +67,8 @@ tail -n 20 /var/log/3xui-reset-traffic.log 2>/dev/null || true
 - 443 入站监听 `443/tcp`。
 - 随机 VLESS 入站监听对应 TCP 端口。
 - HY2 主端口监听 UDP。
-- HY2 端口跳跃 `48000-50000` 已写入 nftables。
+- HY2 端口跳跃 `48000-50000` 已写入 nftables 或 iptables-persistent，当前运行规则与持久化文件一致。
+- 对应持久化服务为 `enabled`，规则在安全 reload 后仍存在；不得把仅存在于运行内存的 NAT 规则标记为通过。
 
 检查示例：
 
@@ -75,6 +76,14 @@ tail -n 20 /var/log/3xui-reset-traffic.log 2>/dev/null || true
 ss -lntup | grep -E ':(443|<随机TCP端口>|<XHTTP端口>)'
 ss -lunp | grep '<HY2主端口>'
 nft list ruleset
+```
+
+若使用 iptables-persistent，改为检查：
+
+```bash
+iptables -t nat -S PREROUTING | grep '48000:50000'
+grep '48000:50000' /etc/iptables/rules.v4
+systemctl is-enabled netfilter-persistent
 ```
 
 ## 运行配置一致性验证
