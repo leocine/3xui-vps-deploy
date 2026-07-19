@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.16
+
+- HY2 port-hopping NAT rules must now be persisted with nftables or iptables-persistent; one-off runtime-only rules are explicitly forbidden.
+- Validation now checks both the active NAT rule and its saved configuration, requires the persistence service to be enabled, and verifies the rule survives a safe reload.
+- Added troubleshooting for port hopping that stops working after an unplanned VPS reboot.
+- Added Sub-Store cache diagnosis for cases where a directly exported HY2 node works but transformed subscriptions still contain stale `mport` or address settings.
+
 ## v1.0.15
 
 - New VPS deployments now collect the monthly traffic reset day and configure the 3x-ui traffic reset script by default.

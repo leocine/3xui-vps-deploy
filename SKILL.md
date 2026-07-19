@@ -83,3 +83,4 @@ SSH 用户名，默认 root:
 - 不在 DNS 未验证返回 VPS IPv4 前部署。
 - 不承诺自动修改 VPS 商家安全组。
 - 不得只因端口监听或 x-ui 为 active 就宣称入站可用；只有按 `references/connectivity-test.md` 完成真实代理 HTTPS 请求才算通过。
+- HY2 端口跳跃规则必须持久化并通过规则重载验收；不得交付只存在于当前运行内存的 nftables/iptables NAT 规则。
