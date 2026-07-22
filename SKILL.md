@@ -82,6 +82,14 @@ SSH 用户名，默认 root:
 - 如果检测到新版，在最终报告里说明当前版本、GitHub 最新版本和升级建议。
 - 如果无法检测，在最终报告里简短说明“本次无法确认 GitHub 最新版本”。
 
+## GitHub Release 记录规则
+
+每次发布新版本时，GitHub Release 的标题和更新内容必须固定使用中文。不要出现一版中文、一版英文的混用。
+
+- Release 标题使用版本号，例如 `v1.0.18`。
+- Release notes 用中文项目符号说明本次更新了什么。
+- README 不记录每个版本的具体变更；具体变更只写在 GitHub Releases 和 `CHANGELOG.md`。
+
 ## 安全规则
 
 - 改 3x-ui 数据库前必须备份 `/etc/x-ui/x-ui.db`。
