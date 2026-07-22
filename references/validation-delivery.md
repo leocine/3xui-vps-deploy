@@ -164,6 +164,11 @@ BBR/调优状态:
 订阅获取:
 - 按 subscription.md 输出，重点标记 Clash Verge 的特殊复制方式
 
+Skill 版本检查:
+- 当前版本:
+- GitHub 最新版本:
+- 是否建议升级:
+
 安全提醒:
 - 立刻修改 VPS root 密码
 - 保存面板地址、用户名、密码

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.17
+
+- Added a non-blocking skill version check that runs before final delivery after every deployment, reset workflow, troubleshooting task, or dry-run.
+- Added `references/version-check.md` with GitHub Release/Tag lookup, semver comparison, and upgrade reminder wording.
+- Final deployment and traffic-reset reports now include skill version check status.
+
 ## v1.0.16
 
 - HY2 port-hopping NAT rules must now be persisted with nftables or iptables-persistent; one-off runtime-only rules are explicitly forbidden.

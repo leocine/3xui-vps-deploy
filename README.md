@@ -62,6 +62,7 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
     ├── validation-delivery.md       # 安装后验收清单、运行配置一致性检查和交付格式
     ├── subscription.md              # 订阅获取方式，尤其 Clash/Mihomo/Clash Verge 的导入注意
     ├── reset-traffic.md             # 已安装 3x-ui 的每月流量自动重置配置流程
+    ├── version-check.md             # 每次使用后的 GitHub 最新版本检查和升级提示规则
     └── local-credentials.md         # 本机凭据文件的创建、权限和安全读取规范
 ```
 
@@ -82,6 +83,6 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.0.16`。
+当前稳定版本：`v1.0.17`。
 
 每个版本的更新内容记录在 GitHub Releases 中。

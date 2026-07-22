@@ -71,6 +71,16 @@ SSH 用户名，默认 root:
 6. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
 7. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。
 8. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式。
+9. 在最终回复前读取 `references/version-check.md`，做一次非阻塞版本检查；如果 GitHub 最新 Release/Tag 高于当前 skill 版本，提醒用户用 `skill-installer` 升级。
+
+## 每次使用后的版本检查
+
+无论是新 VPS 部署、每月流量重置配置、节点故障排查，还是 dry-run 模拟，任务结束前都要执行 `references/version-check.md` 中的版本检查。
+
+- 版本检查是非阻塞步骤，不得因为 GitHub、网络或 `gh` 不可用而影响本次任务结论。
+- 只提示升级，不自动升级 skill；除非用户明确要求“帮我升级 skill”。
+- 如果检测到新版，在最终报告里说明当前版本、GitHub 最新版本和升级建议。
+- 如果无法检测，在最终报告里简短说明“本次无法确认 GitHub 最新版本”。
 
 ## 安全规则
 

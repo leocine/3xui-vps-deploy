@@ -187,6 +187,11 @@ cron 配置:
 测试结果:
 日志路径: /var/log/3xui-reset-traffic.log
 
+Skill 版本检查:
+- 当前版本:
+- GitHub 最新版本:
+- 是否建议升级:
+
 安全说明:
 - 未保存 VPS root 密码或 SSH 私钥
 - 未输出面板密码或 API Token
