@@ -2,6 +2,14 @@
 
 部署完成后必须验证，不要只报告“命令已执行”。
 
+复杂验收查询优先上传并执行 `scripts/validate-deployment.sh`，不要把多段 SQLite 查询、grep 和端口列表拼进一条 SSH 命令。该脚本读取 `/etc/x-ui/install-result.env` 和可选部署状态文件，输出面板、证书、订阅、入站、端口、HY2 NAT、调优和自动重置状态。执行示例：
+
+```bash
+scripts/validate-deployment.sh <面板域名> /root/3xui-deploy-state.env
+```
+
+如果自动入站脚本使用了自定义状态文件名，把第二个参数替换为实际路径。脚本输出可作为服务器侧验收依据；真实代理连通性仍必须继续按 `connectivity-test.md` 从 VPS 外部测试。
+
 ## 基础验证
 
 ```bash

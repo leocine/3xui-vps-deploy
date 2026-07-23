@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.18
+
+- 新增 `scripts/configure-panel-https.sh`，用于在 VPS 端申请或复用证书、备份数据库、写入面板 HTTPS 配置，并开启 Clash/Mihomo 订阅。
+- 新增 `scripts/validate-deployment.sh`，用于服务器侧统一验收面板、证书、入站、端口监听、HY2 NAT、调优和每月流量自动重置状态。
+- 明确复杂远程操作应优先“上传脚本后执行”，避免 SQLite、JSON、cron 等多层引号在 SSH 命令中被远端 shell 吞掉。
+- 修复 `3xui-reset-traffic.sh` 的 3x-ui 版本识别逻辑，避免 3x-ui 3.5.0 下调用交互命令导致自动重置任务卡住。
+- 补充 3x-ui 3.5.0 非交互安装跳过 SSL 的标准处理方式：安装后必须单独配置 HTTPS，不交付 HTTP 面板。
+
 ## v1.0.17
 
 - 新增每次任务结束前的非阻塞版本检查，覆盖部署、流量重置、故障排查和 dry-run 场景。

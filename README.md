@@ -51,6 +51,8 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 │   └── openai.yaml                  # Codex UI 中展示的名称、简介和默认提示
 ├── scripts/
 │   ├── create-local-credentials.sh  # macOS 本机凭据文件生成器，避免在聊天中输入 SSH 密码
+│   ├── configure-panel-https.sh     # VPS 端 HTTPS 与 Clash/Mihomo 订阅配置脚本模板
+│   ├── validate-deployment.sh       # VPS 端部署验收脚本模板，减少多层 SSH 引号问题
 │   └── 3xui-reset-traffic.sh        # VPS 端每月流量重置脚本模板，读取 API Token 配置执行重置
 └── references/
     ├── cloudflare-dns.md            # 域名购买、Cloudflare 接入、A/AAAA 记录和灰云配置
@@ -83,6 +85,6 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.0.17`。
+当前稳定版本：`v1.0.18`。
 
 每个版本的更新内容记录在 GitHub Releases 中。

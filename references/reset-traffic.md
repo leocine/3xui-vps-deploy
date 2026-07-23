@@ -13,7 +13,7 @@ date '+%F %T %Z %z'
 timedatectl 2>/dev/null || true
 systemctl is-active x-ui 2>/dev/null || true
 systemctl status x-ui --no-pager -l 2>/dev/null | sed -n '1,25p' || true
-x-ui version 2>/dev/null || /usr/local/x-ui/x-ui version 2>/dev/null || true
+systemctl status x-ui --no-pager -l 2>/dev/null | sed -nE 's/.*Starting x-ui ([0-9.]+).*/x-ui v\1/p' | head -1 || true
 command -v curl || true
 command -v python3 || true
 command -v crontab || true

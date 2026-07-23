@@ -61,15 +61,17 @@ SSH 用户名，默认 root:
 
 真实部署时，尽量一键执行，不做无意义的中间确认。只有遇到会导致覆盖、失败或锁死 SSH 的风险时才停下询问。
 
+复杂远程操作优先使用“本地生成脚本、上传到 VPS、再执行脚本”的方式，尤其是 SQLite 写入、jq JSON payload、cron 写入、多行验收查询和带多层引号的命令。不要把复杂 SQL 或 JSON 直接塞进单条 SSH 命令；远端 shell 容易吞掉引号，导致配置写入或验收失败。
+
 1. 按 `references/preflight-recovery.md` 做自动预检。预检失败时先给出明确修复动作，不继续部署。
-2. 按 `references/deploy-panel.md` 安装 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、处理本机防火墙、关闭 IPv6。安装相关命令必须以官方最新文档 `https://docs.sanaei.dev/docs/` 为准，不使用旧教程。
+2. 按 `references/deploy-panel.md` 安装 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、处理本机防火墙、关闭 IPv6。配置 HTTPS 和订阅开关时优先上传并执行 `scripts/configure-panel-https.sh`。安装相关命令必须以官方最新文档 `https://docs.sanaei.dev/docs/` 为准，不使用旧教程。
 3. 面板安装完成后只询问一次是否一键创建入站：
    - 是：按 `references/inbounds.md` 创建 4 个入站。
    - 否：跳过入站，直接调优。
 4. 无论是否创建入站，都按 `references/tuning.md` 执行网络调优。
 5. 默认读取 `references/reset-traffic.md`，按部署前收集的每月流量重置日配置 3x-ui 自动重置 inbound/client 流量统计。新部署场景优先复用 `/etc/x-ui/install-result.env` 中的 `XUI_API_TOKEN`，不要要求用户在聊天中提供面板密码或 API Token。
 6. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
-7. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。
+7. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。基础验收优先上传并执行 `scripts/validate-deployment.sh`，再补做 VPS 外部的真实代理连通性测试。
 8. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式。
 9. 在最终回复前读取 `references/version-check.md`，做一次非阻塞版本检查；如果 GitHub 最新 Release/Tag 高于当前 skill 版本，提醒用户用 `skill-installer` 升级。
 
@@ -86,7 +88,7 @@ SSH 用户名，默认 root:
 
 每次发布新版本时，GitHub Release 的标题和更新内容必须固定使用中文。不要出现一版中文、一版英文的混用。
 
-- Release 标题使用版本号，例如 `v1.0.18`。
+- Release 标题使用版本号，例如 `vX.Y.Z`。
 - Release notes 用中文项目符号说明本次更新了什么。
 - README 不记录每个版本的具体变更；具体变更只写在 GitHub Releases 和 `CHANGELOG.md`。
 

@@ -112,7 +112,12 @@ print(f"traffic_total={traffic_total}")
 
 log "Start 3x-ui traffic reset"
 
-version="$(/usr/local/x-ui/x-ui version 2>/dev/null | head -1 || true)"
+version="$(
+  systemctl status x-ui --no-pager -l 2>/dev/null \
+    | sed -nE 's/.*Starting x-ui ([0-9.]+).*/x-ui v\1/p' \
+    | head -1 \
+    || true
+)"
 [[ -n "$version" ]] && log "3x-ui version: $version"
 
 list_json="$(api GET "/panel/api/inbounds/list")" || fail "Failed to list inbounds"
