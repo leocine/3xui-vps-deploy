@@ -1,20 +1,9 @@
 ---
 name: 3xui-vps-deploy
-description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板，或在已安装 3x-ui 的 VPS 上配置每月自动重置流量。部署场景会先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装面板、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP/HY2 入站、配置 HY2 端口跳跃和系统网络调优。自动重置场景会只配置 3x-ui inbound/client 流量统计重置脚本、日志和 cron，不修改节点配置。
+description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板。先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装官方稳定版 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP/HY2 入站、配置 HY2 端口跳跃和系统网络调优。
 ---
 
 # 3x-ui VPS Deploy
-
-## 自动流量重置请求
-
-用户要求“每月自动重置流量 / VPS 流量周期重置 / 3x-ui 重置 inbound 和 client 流量统计”时，不走新 VPS 部署的域名门禁，也不要安装或升级 3x-ui。读取 `references/reset-traffic.md`，只完成该文档中的只读检查、重置日询问、API Token 配置、脚本安装、cron 配置和测试验证。
-
-自动重置任务的硬限制：
-
-- 只允许重置流量统计。
-- 不得重装、升级或重配 3x-ui。
-- 不得修改入站、客户端、节点参数、Xray、证书、防火墙、SSH 或系统网络。
-- 不得保存或输出 VPS root 密码、SSH 私钥、面板密码、API Token。
 
 ## 必须先做的门禁
 
@@ -46,10 +35,7 @@ SSH 端口:
 SSH 用户名，默认 root:
 系统，Debian 或 Ubuntu:
 面板域名:
-每月流量重置日，例如 17 或 22:
 ```
-
-默认在流量重置日的北京时间 `08:05` 执行 3x-ui 流量统计重置。若用户不确定重置日，先让用户查看 VPS 商家流量周期；不要自行假设日期。
 
 在 macOS 上，读取 `references/local-credentials.md`：自动创建并打开本机凭据文件，让用户只填写临时 root 密码、保存并回复“已保存”。优先读取这个文件，不要在聊天中索取密码。
 
@@ -61,7 +47,7 @@ SSH 用户名，默认 root:
 
 真实部署时，尽量一键执行，不做无意义的中间确认。只有遇到会导致覆盖、失败或锁死 SSH 的风险时才停下询问。
 
-复杂远程操作优先使用“本地生成脚本、上传到 VPS、再执行脚本”的方式，尤其是 SQLite 写入、jq JSON payload、cron 写入、多行验收查询和带多层引号的命令。不要把复杂 SQL 或 JSON 直接塞进单条 SSH 命令；远端 shell 容易吞掉引号，导致配置写入或验收失败。
+复杂远程操作优先使用“本地生成脚本、上传到 VPS、再执行脚本”的方式，尤其是 SQLite 写入、jq JSON payload、多行验收查询和带多层引号的命令。不要把复杂 SQL 或 JSON 直接塞进单条 SSH 命令；远端 shell 容易吞掉引号，导致配置写入或验收失败。
 
 1. 按 `references/preflight-recovery.md` 做自动预检。预检失败时先给出明确修复动作，不继续部署。
 2. 按 `references/deploy-panel.md` 安装 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、处理本机防火墙、关闭 IPv6。配置 HTTPS 和订阅开关时优先上传并执行 `scripts/configure-panel-https.sh`。安装相关命令必须以官方最新文档 `https://docs.sanaei.dev/docs/` 为准，不使用旧教程。
@@ -69,15 +55,14 @@ SSH 用户名，默认 root:
    - 是：按 `references/inbounds.md` 创建 4 个入站。
    - 否：跳过入站，直接调优。
 4. 无论是否创建入站，都按 `references/tuning.md` 执行网络调优。
-5. 默认读取 `references/reset-traffic.md`，按部署前收集的每月流量重置日配置 3x-ui 自动重置 inbound/client 流量统计。新部署场景优先复用 `/etc/x-ui/install-result.env` 中的 `XUI_API_TOKEN`，不要要求用户在聊天中提供面板密码或 API Token。
-6. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
-7. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。基础验收优先上传并执行 `scripts/validate-deployment.sh`，再补做 VPS 外部的真实代理连通性测试。
-8. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式。
-9. 在最终回复前读取 `references/version-check.md`，做一次非阻塞版本检查；如果 GitHub 最新 Release/Tag 高于当前 skill 版本，提醒用户用 `skill-installer` 升级。
+5. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
+6. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。基础验收优先上传并执行 `scripts/validate-deployment.sh`，再补做 VPS 外部的真实代理连通性测试。
+7. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式；如用户需要每月流量周期重置，说明应在新版 3x-ui 面板中配置，不部署 VPS 脚本、cron 或 API Token。
+8. 在最终回复前读取 `references/version-check.md`，做一次非阻塞版本检查；如果 GitHub 最新 Release/Tag 高于当前 skill 版本，提醒用户用 `skill-installer` 升级。
 
 ## 每次使用后的版本检查
 
-无论是新 VPS 部署、每月流量重置配置、节点故障排查，还是 dry-run 模拟，任务结束前都要执行 `references/version-check.md` 中的版本检查。
+无论是新 VPS 部署、节点故障排查，还是 dry-run 模拟，任务结束前都要执行 `references/version-check.md` 中的版本检查。
 
 - 版本检查是非阻塞步骤，不得因为 GitHub、网络或 `gh` 不可用而影响本次任务结论。
 - 只提示升级，不自动升级 skill；除非用户明确要求“帮我升级 skill”。

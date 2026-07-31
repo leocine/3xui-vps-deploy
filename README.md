@@ -30,15 +30,7 @@
 帮我部署一台新的 3x-ui VPS。
 ```
 
-Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成部署。macOS 环境会优先使用本机临时凭据文件，避免在对话中输入 VPS 密码。
-
-如果只是给已安装 3x-ui 的 VPS 配置每月流量自动重置，可以说：
-
-```text
-帮我在当前 VPS 上配置 3x-ui 每月自动重置流量。
-```
-
-新 VPS 部署会默认配置每月流量自动重置；单独使用这个模式时，只会配置 inbound/client 流量统计重置脚本、日志和 cron，不会修改节点配置、Xray 配置、防火墙、SSH 或系统网络。
+Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成部署。macOS 环境会优先使用本机临时凭据文件，避免在对话中输入 VPS 密码。若需要定期重置流量，请直接在新版 3x-ui 面板中按入站或客户端配置；本 Skill 不会在 VPS 上安装重置脚本或 cron。
 
 ## 目录结构
 
@@ -52,18 +44,16 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 ├── scripts/
 │   ├── create-local-credentials.sh  # macOS 本机凭据文件生成器，避免在聊天中输入 SSH 密码
 │   ├── configure-panel-https.sh     # VPS 端 HTTPS 与 Clash/Mihomo 订阅配置脚本模板
-│   ├── validate-deployment.sh       # VPS 端部署验收脚本模板，减少多层 SSH 引号问题
-│   └── 3xui-reset-traffic.sh        # VPS 端每月流量重置脚本模板，读取 API Token 配置执行重置
+│   └── validate-deployment.sh       # VPS 端部署验收脚本模板，减少多层 SSH 引号问题
 └── references/
     ├── cloudflare-dns.md            # 域名购买、Cloudflare 接入、A/AAAA 记录和灰云配置
     ├── preflight-recovery.md        # SSH 后的系统预检、DNS 核验和失败恢复
-    ├── deploy-panel.md              # 3x-ui 安装、HTTPS、订阅开关、Xray Core 固定和防火墙处理
+    ├── deploy-panel.md              # 3x-ui 安装、HTTPS、订阅开关、Xray Core 和防火墙处理
     ├── inbounds.md                  # VLESS Reality、XHTTP Reality、HY2 入站创建规则
     ├── tuning.md                    # IPv4 优先、BBR/FQ、内核参数和网卡队列调优
     ├── connectivity-test.md         # 真实代理连通性测试、抓包判断和故障分类
     ├── validation-delivery.md       # 安装后验收清单、运行配置一致性检查和交付格式
     ├── subscription.md              # 订阅获取方式，尤其 Clash/Mihomo/Clash Verge 的导入注意
-    ├── reset-traffic.md             # 已安装 3x-ui 的每月流量自动重置配置流程
     ├── version-check.md             # 每次使用后的 GitHub 最新版本检查和升级提示规则
     └── local-credentials.md         # 本机凭据文件的创建、权限和安全读取规范
 ```
@@ -76,15 +66,14 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 2. **注册并接入 Cloudflare**：确认是否已有 Cloudflare 账号。没有就先注册；有域名后，把域名添加到 Cloudflare，再将 Cloudflare 给出的两条 nameserver 填到买域名的网站，等 Cloudflare 显示域名已接入。
 3. **设置域名解析**：创建一个面板子域名的 A 记录，例如 `panel.example.com`，让它指向 VPS IP。代理状态必须设为 `DNS only` / 灰云；如果有同名 AAAA 记录，也会提示删除。Codex 会验证公网解析生效后再继续。
 4. **连接 VPS**：收集 VPS IP、SSH 端口、系统和面板域名。macOS 上会优先打开一个只保存在本机的文件填写临时 root 密码，避免把密码发到对话里。
-5. **安装 3x-ui 面板**：先检查系统和端口，再根据 3x-ui 官方最新文档安装面板；安装后会把 Xray Core 固定到 `26.6.27`，再申请 HTTPS 证书、开启 Clash/Mihomo 订阅、处理 VPS 本机防火墙，并关闭 IPv6。
+5. **安装 3x-ui 面板**：先检查系统和端口，再根据 3x-ui 官方最新文档安装面板。新版会使用官方稳定版自带且已适配的 Xray Core，不再手动降级；随后申请 HTTPS 证书、开启 Clash/Mihomo 订阅、处理 VPS 本机防火墙，并关闭 IPv6。
 6. **可选的一键入站**：你可以自己在面板中创建入站，也可以让 Codex 自动创建 4 个常用节点：443 VLESS TCP Reality、随机端口 VLESS TCP Reality、随机端口 VLESS XHTTP Reality，以及带 `48000-50000` UDP 端口跳跃的 HY2。自动模式只建一个客户端 `admin`，四个节点都会归到它下面。
 7. **自动调优**：无论你是否创建入站，都会使用 VPSing 的 TCP/BBR 调优脚本（`tcp.vpsing.de`），自动完成 IPv4 优先、BBR + FQ、内核调优和网卡多队列这 4 步。
-8. **配置流量重置**：根据这台 VPS 的每月流量重置日，默认配置 3x-ui inbound/client 流量统计自动重置脚本、日志和 cron。
-9. **检查是否真的可用**：会检查面板、证书、端口、端口跳跃、订阅和流量重置定时任务。HY2 跳跃规则必须写入 nftables 或 iptables-persistent，并在规则重载后仍存在，避免 VPS 重启后失效。创建节点时，还会用真实的代理访问测试来确认连接成功，不会只看端口是否打开；如果 VPS 商家安全组挡住了端口，会告诉你去商家后台放行。
-10. **告诉你怎么使用**：最后会给出面板地址和登录信息，并说明如何在 3x-ui 的 `客户端 -> admin` 中取得订阅。使用 Clash Verge 时，会特别说明要先在浏览器打开订阅链接，再复制页面里的 Clash 订阅内容。
+8. **检查是否真的可用**：会检查面板、证书、端口、端口跳跃和订阅。HY2 跳跃规则必须写入 nftables 或 iptables-persistent，并在规则重载后仍存在，避免 VPS 重启后失效。创建节点时，还会用真实的代理访问测试来确认连接成功，不会只看端口是否打开；如果 VPS 商家安全组挡住了端口，会告诉你去商家后台放行。
+9. **告诉你怎么使用**：最后会给出面板地址和登录信息，并说明如何在 3x-ui 的 `客户端 -> admin` 中取得订阅。使用 Clash Verge 时，会特别说明要先在浏览器打开订阅链接，再复制页面里的 Clash 订阅内容。
 
 ## 版本
 
-当前稳定版本：`v1.0.18`。
+当前稳定版本：`v1.1.0`。
 
 每个版本的更新内容记录在 GitHub Releases 中。

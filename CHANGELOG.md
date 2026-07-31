@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.0
+
+- 适配 3x-ui `v3.5.0`：使用官方稳定版自带且已适配的 Xray Core，不再强制降级或手动替换 Core 二进制。
+- 删除 VPS 端流量重置脚本、API Token 配置、cron 和相关验收；需要周期重置时改为在 3x-ui 面板中配置。
+- 更新部署、连通性测试和交付说明，去除旧 Core 版本与自动重置的过期前提。
+
 ## v1.0.18
 
 - 新增 `scripts/configure-panel-https.sh`，用于在 VPS 端申请或复用证书、备份数据库、写入面板 HTTPS 配置，并开启 Clash/Mihomo 订阅。

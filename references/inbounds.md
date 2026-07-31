@@ -134,7 +134,7 @@ Password (PublicKey): <public>
 - `disablePathMTUDiscovery=false`
 - `maxIncomingStreams=1024`
 
-3x-ui 3.5.0 / Xray 26.6.27 的 Hysteria stream schema 只稳定支持 `version`、`auth`、`udpIdleTimeout` 和 TLS 证书等核心字段。窗口、拥塞、`udpHop` 等扩展项如果不是当前面板/Xray wire shape 明确支持，不要硬塞进 `streamSettings`；端口跳跃用 nftables 单独实现并验收。
+新版 3x-ui 的 Hysteria stream schema 只写入面板明确支持的核心字段：`version`、`auth`、`udpIdleTimeout` 和 TLS 证书。窗口、拥塞、`udpHop` 等扩展项若没有当前面板的明确字段，不要硬塞进 `streamSettings`；端口跳跃继续用 nftables 单独实现并验收。
 
 ## HY2 端口跳跃转发
 

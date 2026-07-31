@@ -37,28 +37,13 @@ XUI_NONINTERACTIVE=1 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/
 - 不要用可能进入交互菜单或返回 `Invalid subcommands` 的 `x-ui version` 作为自动脚本中的版本探测。需要记录 3x-ui 版本时，优先从 `systemctl status x-ui --no-pager -l` 中解析 `Starting x-ui <version>`；读不到就跳过版本日志，不得阻塞 cron 或部署流程。
 - 用本机或外部环境验证面板时，以 `GET https://<面板域名>:<端口>/<webBasePath>/` 返回 `200` 为准。`HEAD` 请求可能返回 `404`；在 VPS 自己访问公网域名也可能受发夹 NAT/回环影响出现 TLS 错误，不能单独判定面板不可用。
 
-## 固定 Xray Core 版本
+## Xray Core
 
-3x-ui `3.5.0` 默认或更新后可能使用 Xray Core `26.7.11`。已知该版本可能导致配置正确的 VLESS Reality 节点在部分客户端不通。安装 3x-ui 后，必须把 Xray Core 固定到 `26.6.27`。
+使用 3x-ui 官方稳定版随面板安装的 Xray Core，不再固定或降级到旧版本。3x-ui `v3.5.0` 已升级并适配 Xray Core `v26.7.11`。
 
-优先在 3x-ui 面板中操作：
-
-1. 打开面板的 Xray / Core 版本管理。
-2. 将 Xray Core 版本选择为 `26.6.27`。
-3. 应用后重启 `x-ui`。
-
-如果通过 CLI 或脚本切换，执行前先确认当前 `x-ui` 版本支持对应命令；不要盲目覆盖二进制。切换后验证：
-
-```bash
-/usr/local/x-ui/bin/xray-linux-amd64 version | head -1
-systemctl restart x-ui
-sleep 3
-systemctl is-active x-ui
-```
-
-期望第一行包含 `Xray 26.6.27`。如果仍是 `26.7.11`，不要继续创建或交付 VLESS Reality 入站，先回到面板切换核心版本。
-
-如果面板没有可用的 Core 版本切换入口，可从 Xray-core 官方 Release 下载 `v26.6.27` 对应架构包，先备份现有 `/usr/local/x-ui/bin/xray-linux-amd64`，再仅替换该二进制。`xray x25519` 在 `26.6.27` 的输出字段是 `PrivateKey:` 和 `Password (PublicKey):`，脚本解析 Reality 密钥时要兼容这个格式。
+- 不要手动覆盖 `/usr/local/x-ui/bin/xray-linux-*`。
+- 只记录当前版本用于诊断：`/usr/local/x-ui/bin/xray-linux-amd64 version | head -1`。
+- 只有官方后续发布明确要求、且用户同意时，才在面板的 Xray Core 管理界面切换版本；切换后重启 `x-ui` 并重新做真实连通性测试。
 
 ## 配置 HTTPS
 

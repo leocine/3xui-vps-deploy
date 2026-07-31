@@ -83,14 +83,6 @@ echo "ipv4_prefer=$(grep -E '^precedence ::ffff:0:0/96' /etc/gai.conf 2>/dev/nul
 echo "bbr=$(sysctl -n net.ipv4.tcp_congestion_control 2>/dev/null || true)"
 echo "qdisc=$(sysctl -n net.core.default_qdisc 2>/dev/null || true)"
 
-echo "reset_script=$(test -x /usr/local/bin/3xui-reset-traffic.sh && echo yes || echo no)"
-if [[ -f /etc/3xui-reset-traffic.env ]]; then
-  echo "reset_env=$(stat -c '%a %U %G %n' /etc/3xui-reset-traffic.env)"
-fi
-echo "reset_cron=$(crontab -l 2>/dev/null | grep '/usr/local/bin/3xui-reset-traffic.sh' || true)"
-if [[ -f /var/log/3xui-reset-traffic.log ]]; then
-  echo "reset_log_last=$(tail -n 1 /var/log/3xui-reset-traffic.log)"
-fi
 
 echo "config_ports_begin"
 for p in "${TCP443_PORT:-}" "${TCP_RANDOM_PORT:-}" "${XHTTP_PORT:-}" "${HY2_PORT:-}"; do
