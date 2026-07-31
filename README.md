@@ -74,6 +74,6 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前稳定版本：`v1.1.0`。
+当前稳定版本：`v1.1.1`。
 
 每个版本的更新内容记录在 GitHub Releases 中。

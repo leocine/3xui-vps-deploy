@@ -15,7 +15,7 @@ IP Limit: 不填
 cp /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.bak
 ```
 
-3x-ui 3.5.0 自动化优先调用本机面板 API：
+3x-ui 3.6.0 自动化优先调用本机面板 API：
 
 ```bash
 . /etc/x-ui/install-result.env
@@ -46,9 +46,9 @@ curl -k -H "Authorization: Bearer ${XUI_API_TOKEN}" \
 - XHTTP Reality flow: 空
 - HY2 无 flow
 
-### 3x-ui 3.5.0 客户端表结构
+### 3x-ui 3.6.0 客户端表结构
 
-3x-ui 3.5.0 会维护独立的 `clients` 和 `client_inbounds` 表：
+3x-ui 3.6.0 会维护独立的 `clients` 和 `client_inbounds` 表：
 
 ```bash
 sqlite3 /etc/x-ui/x-ui.db ".schema clients"

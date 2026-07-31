@@ -51,7 +51,7 @@ subClashPath|/clash/
 - 只有一个逻辑客户端 `admin`，没有 `admin-xhttp`、`admin-vless`、`admin-hy2`、`admin01` 这类拆分客户端。
 - 4 个入站都关联到 `admin`；3 个 VLESS 入站使用同一个 `admin` 客户端 UUID。
 - HY2 有随机 auth。
-- 3x-ui 3.5.0 还要确认 `clients` 表里只有一个逻辑 `admin`，并通过 `client_inbounds` 关联到 4 个入站；4 个关联使用同一个 `sub_id`。
+- 3x-ui 3.6.0 还要确认 `clients` 表里只有一个逻辑 `admin`，并通过 `client_inbounds` 关联到 4 个入站；4 个关联使用同一个 `sub_id`。
 - 443 入站监听 `443/tcp`。
 - 随机 VLESS 入站监听对应 TCP 端口。
 - HY2 主端口监听 UDP。
@@ -96,7 +96,7 @@ ss -lntup | grep -E ':<端口>\b'
 
 然后再次对比 `config.json`。只有确认 Xray 实际运行配置已加载最新字段，才继续做客户端连通性测试。
 
-对 3x-ui 3.5.0，还要直接确认 4 个端口都进入实际配置：
+对 3x-ui 3.6.0，还要直接确认 4 个端口都进入实际配置：
 
 ```bash
 for p in 443 <随机TCP端口> <XHTTP端口> <HY2端口>; do

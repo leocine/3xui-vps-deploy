@@ -29,17 +29,17 @@ XUI_NONINTERACTIVE=1 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/
 6. 从安装输出或 `/etc/x-ui/install-result.env` 读取面板 URL、用户名、密码、端口、web base path。
 7. 确认随机端口、随机用户名、随机密码、随机路径已生效。
 
-### 3x-ui 3.5.0 实测注意
+### 3x-ui 3.6.0 实测注意
 
 - `XUI_NONINTERACTIVE=1` 会自动生成随机端口、用户名、密码、web base path，并写入 `/etc/x-ui/install-result.env`，但当前版本可能默认跳过 SSL。不要因此交付 HTTP 面板；安装后必须单独申请证书并写入面板 HTTPS 配置。
-- 3x-ui 3.5.0 登录接口带 CSRF，直接脚本 POST `/login` 很容易返回 `403`。自动化调用 `/panel/api/*` 时优先使用 `/etc/x-ui/install-result.env` 里的 `XUI_API_TOKEN`，请求头使用 `Authorization: Bearer <token>`。
+- 3x-ui 3.6.0 登录接口带 CSRF，直接脚本 POST `/login` 很容易返回 `403`。自动化调用 `/panel/api/*` 时优先使用 `/etc/x-ui/install-result.env` 里的 `XUI_API_TOKEN`，请求头使用 `Authorization: Bearer <token>`。
 - 避免直接通过单条 SSH 命令执行复杂 SQLite SQL；远端 shell 可能吞掉 SQL 字符串中的引号。配置 HTTPS、Clash/Mihomo 订阅等数据库写入时，优先上传 `scripts/configure-panel-https.sh` 到 VPS 后执行。
 - 不要用可能进入交互菜单或返回 `Invalid subcommands` 的 `x-ui version` 作为自动脚本中的版本探测。需要记录 3x-ui 版本时，优先从 `systemctl status x-ui --no-pager -l` 中解析 `Starting x-ui <version>`；读不到就跳过版本日志，不得阻塞 cron 或部署流程。
 - 用本机或外部环境验证面板时，以 `GET https://<面板域名>:<端口>/<webBasePath>/` 返回 `200` 为准。`HEAD` 请求可能返回 `404`；在 VPS 自己访问公网域名也可能受发夹 NAT/回环影响出现 TLS 错误，不能单独判定面板不可用。
 
 ## Xray Core
 
-使用 3x-ui 官方稳定版随面板安装的 Xray Core，不再固定或降级到旧版本。3x-ui `v3.5.0` 已升级并适配 Xray Core `v26.7.11`。
+使用 3x-ui 官方稳定版随面板安装的 Xray Core，不再固定或降级到旧版本。3x-ui `v3.6.0` 已升级并适配 Xray Core `v26.7.28`。
 
 - 不要手动覆盖 `/usr/local/x-ui/bin/xray-linux-*`。
 - 只记录当前版本用于诊断：`/usr/local/x-ui/bin/xray-linux-amd64 version | head -1`。
@@ -56,7 +56,7 @@ XUI_NONINTERACTIVE=1 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/
 /etc/letsencrypt/live/<面板域名>/privkey.pem
 ```
 
-写入 3x-ui 3.5.0 面板 HTTPS 配置时，settings 表使用：
+写入 3x-ui 3.6.0 面板 HTTPS 配置时，settings 表使用：
 
 ```text
 webCertFile=/etc/letsencrypt/live/<面板域名>/fullchain.pem
