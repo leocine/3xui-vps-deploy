@@ -76,16 +76,18 @@ systemctl is-enabled netfilter-persistent
 
 ## 运行配置一致性验证
 
-3x-ui 面板数据库和 Xray 实际运行配置必须一致。尤其在修改 UUID、flow、Reality 密钥、SNI/serverNames、shortId 后，不能只看面板或订阅。
+3x-ui 面板数据库和 Xray 实际运行配置必须一致。尤其在修改 UUID、flow、Reality 密钥、SNI/serverNames、shortId、`minClientVer` 后，不能只看面板或订阅。
 
 检查对应入站的关键字段是否同时出现在数据库和实际配置中：
 
 ```bash
 sqlite3 /etc/x-ui/x-ui.db "select settings,stream_settings from inbounds where port=<端口>;" | grep -oE '<客户端email>|<UUID前缀>|xtls-rprx-vision|<serverName>|<shortId>'
+sqlite3 /etc/x-ui/x-ui.db "select stream_settings from inbounds where port=<端口>;" | grep -Eq 'minClientVer.*1\.0\.0'
 grep -oE '<客户端email>|<UUID前缀>|xtls-rprx-vision|<serverName>|<shortId>' /usr/local/x-ui/bin/config.json
+grep -Eq '"minClientVer"[[:space:]]*:[[:space:]]*"1\.0\.0"' /usr/local/x-ui/bin/config.json
 ```
 
-如果数据库是新配置，但 `/usr/local/x-ui/bin/config.json` 仍是旧 UUID、旧 Reality 目标或旧 flow，执行：
+如果数据库是新配置，但 `/usr/local/x-ui/bin/config.json` 仍是旧 UUID、旧 Reality 目标、旧 flow 或缺少 `minClientVer: 1.0.0`，执行：
 
 ```bash
 systemctl restart x-ui

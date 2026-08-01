@@ -106,7 +106,8 @@ Password (PublicKey): <public>
 - `spiderX=/`
 - `show=false`
 - `xver=0`
-- `minClientVer`、`maxClientVer` 留空
+- `minClientVer=1.0.0`：不要留空。留空会使用 Xray Core 的内置最低版本，可能拒绝 Mihomo、sing-box 等自报版本较低的客户端。
+- `maxClientVer` 留空
 - `maxTimediff=0`
 
 ## HY2

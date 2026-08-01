@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.2
+
+- 所有 VLESS + Reality 入站固定 `minClientVer=1.0.0`，避免留空时 Xray Core 内置最低版本拒绝 Mihomo、sing-box 等客户端。
+- 将该字段加入运行配置一致性验证与 Mihomo 故障排查。
+
 ## v1.1.1
 
 - 适配 3x-ui `v3.6.0` 与内置 Xray Core `v26.7.28`。
