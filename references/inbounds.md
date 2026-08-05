@@ -1,4 +1,4 @@
-# 一键创建 4 个入站
+# 一键创建 5 个入站
 
 如果用户选择“是”，不要追问客户端信息，默认：
 
@@ -27,22 +27,39 @@ curl -k -H "Authorization: Bearer ${XUI_API_TOKEN}" \
 
 ## 入站列表
 
-1. `US-TCP-Reality-443`: VLESS + TCP + Reality，端口 443
-2. `US-TCP-Reality-Random`: VLESS + TCP + Reality，随机 5 位端口
-3. `US-XHTTP-Reality-Random`: VLESS + XHTTP + Reality，随机 5 位端口
-4. `US-HY2-TLS-Hop`: Hysteria2 + UDP + TLS，随机 5 位 UDP 主端口，端口跳跃 `48000-50000`
+1. `US-VLESS-TCP`: VLESS + TCP + Reality，端口 443。
+2. `US-VLESS-TCP-01`: VLESS + TCP + Reality，随机 5 位端口。
+3. `US-VLESS-XHTTP`: VLESS + XHTTP + Reality，随机 5 位端口。
+4. `US-VLESS-TCP-PQ`: VLESS + TCP + 后量子 Reality，随机 5 位端口。
+5. `US-HY2-Hop`: Hysteria2 + UDP + TLS，随机 5 位 UDP 主端口，端口跳跃 `48000-50000`。
 
-随机主端口范围 `10000-59999`，避开 `48000-50000`。443 被占用时先询问。
+随机主端口范围 `10000-59999`，避开 `48000-50000`，且四个随机端口必须彼此不同。443 被占用时先询问。
+
+## 节点备注命名
+
+所有自动创建入站的 `remark`，以及导出时保留的节点名称，都必须按以下格式生成：
+
+```text
+地区-协议-传输-特性-编号
+```
+
+- 地区和协议必须保留；本 Skill 默认地区为 `US`，协议为 `VLESS` 或 `HY2`。
+- VLESS 必须保留传输方式：`TCP`、`XHTTP` 或 `WS`。HY2 不写 `UDP`。
+- 只允许两个特性：后量子写 `PQ`，HY2 端口跳跃写 `Hop`。
+- 不得写入 `Reality`、`TLS`、`CDN`、`Argo`、`Brutal`、端口、客户端 email 或用途文案；CDN 与 Argo 由订阅转换层处理。
+- 同一地区、协议、传输和特性完全相同的第一个节点不加编号，后续依次加 `-01`、`-02`。编号永远放在最后。
+- 禁止使用 `Random`、`Test`、`Backup` 等临时名称。
+- 本次自动创建固定使用：`US-VLESS-TCP`、`US-VLESS-TCP-01`、`US-VLESS-XHTTP`、`US-VLESS-TCP-PQ`、`US-HY2-Hop`。
 
 ## 客户端
 
 - 只创建一个逻辑客户端，名称/email 固定为 `admin`。
 - 不要创建 `admin-xhttp`、`admin-vless`、`admin-hy2`、`admin01` 或任何按协议拆分的客户端。
-- 4 个入站都必须关联到 `admin` 这个客户端；在 3x-ui 支持的情况下，所有入站里的 `admin` 使用同一个 `subId`，保证订阅里聚合到同一个 `admin` 客户端。
-- 3 个 VLESS 入站共用同一个随机 UUID，email `admin`。
+- 5 个入站都必须关联到 `admin` 这个客户端；在 3x-ui 支持的情况下，所有入站里的 `admin` 使用同一个 `subId`，保证订阅里聚合到同一个 `admin` 客户端。
+- 4 个 VLESS 入站共用同一个随机 UUID，email `admin`。
 - HY2 因协议需要使用随机 `auth`，但 email 仍使用 `admin`；如果 3x-ui 支持 `subId`，也使用同一个 `admin` subId。
 - `totalGB=0`、`expiryTime=0`、`limitIp=0`。
-- TCP Reality flow: `xtls-rprx-vision`
+- TCP Reality（含后量子入站）flow: `xtls-rprx-vision`
 - XHTTP Reality flow: 空
 - HY2 无 flow
 
@@ -55,12 +72,12 @@ sqlite3 /etc/x-ui/x-ui.db ".schema clients"
 sqlite3 /etc/x-ui/x-ui.db ".schema client_inbounds"
 ```
 
-同一个 email 只能在同一个 `subId` 下跨入站复用；否则 API 会报 `Duplicate email`。创建 4 个入站时必须：
+同一个 email 只能在同一个 `subId` 下跨入站复用；否则 API 会报 `Duplicate email`。创建 5 个入站时必须：
 
-- 预先生成一个随机 `subId`，四个入站里的 `admin` 都使用同一个值。
-- 3 个 VLESS 入站使用同一个 UUID，HY2 使用独立随机 `auth`，但仍使用同一个 `subId`。
+- 预先生成一个随机 `subId`，五个入站里的 `admin` 都使用同一个值。
+- 4 个 VLESS 入站使用同一个 UUID，HY2 使用独立随机 `auth`，但仍使用同一个 `subId`。
 - 通过 API 新增入站时让 3x-ui 自己同步 `clients`、`client_inbounds` 和运行时配置；直接改 SQLite 时必须同时维护这些表和入站 `settings`，否则订阅、客户端页和 Xray 实际配置可能不一致。
-- 创建后检查 `clients` 只有一个逻辑 `admin`，`client_inbounds` 关联到 4 个入站，且 `flow_override` 在两个 TCP Reality 入站为 `xtls-rprx-vision`、XHTTP/HY2 为空。
+- 创建后检查 `clients` 只有一个逻辑 `admin`，`client_inbounds` 关联到 5 个入站，且 `flow_override` 在三个 TCP Reality 入站为 `xtls-rprx-vision`、XHTTP/HY2 为空。
 
 ## VLESS 通用
 
@@ -86,6 +103,15 @@ sqlite3 /etc/x-ui/x-ui.db ".schema client_inbounds"
 PrivateKey: <private>
 Password (PublicKey): <public>
 ```
+
+## 后量子 VLESS TCP Reality
+
+- 使用独立的随机 TCP 高位端口和独立的 Reality `privateKey/publicKey`、`shortIds`。
+- `remark=US-VLESS-TCP-PQ`，并沿用 TCP Reality 的其余参数与 `xtls-rprx-vision`。
+- 在服务端 `realitySettings.mldsa65Seed` 写入当前 Xray Core 执行 `xray mldsa65` 生成的 seed；在客户端 Reality 参数 `settings.mldsa65Verify` 写入同次命令输出的 verify。两项必须是一对，不能混用或手填示例值。
+- 该入站的 `mldsa65Seed` 与 `mldsa65Verify` 都不得为空；生成或写入失败时停止创建这个入站并明确报错，不能以普通 Reality 入站冒充后量子节点。
+- 先用当前 Xray Core 的 `xray tls ping <target域名>` 检查目标站。ML-DSA-65 会增大临时证书，目标站返回的证书必须大于 3500 bytes；不满足时换一个符合条件的目标与匹配 SNI 后再创建。另记录该目标是否支持 `X25519MLKEM768`：支持时才同时具备后量子密钥协商；仅 ML-DSA-65 时仍是后量子证书签名保护，不能在交付中写成“全链路后量子”。
+- 该入站仅面向支持 ML-DSA-65 的新客户端。订阅中仍保留其他三个普通 VLESS 入站作为兼容选项。
 
 ## XHTTP Reality
 
@@ -192,5 +218,5 @@ systemctl is-enabled netfilter-persistent
 ```bash
 sqlite3 /etc/x-ui/x-ui.db "select id,remark,protocol,port,enable from inbounds order by id;"
 sqlite3 /etc/x-ui/x-ui.db "select c.email,i.remark,ci.flow_override from clients c join client_inbounds ci on ci.client_id=c.id join inbounds i on i.id=ci.inbound_id order by i.id;"
-for p in 443 <随机TCP端口> <XHTTP端口> <HY2端口>; do grep -q "\"port\": $p" /usr/local/x-ui/bin/config.json && echo "config_port_$p=present"; done
+for p in 443 <随机TCP端口> <XHTTP端口> <PQ_TCP端口> <HY2端口>; do grep -q "\"port\": $p" /usr/local/x-ui/bin/config.json && echo "config_port_$p=present"; done
 ```

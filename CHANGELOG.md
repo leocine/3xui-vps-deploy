@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.0
+
+- 一键创建入站由 4 个扩展为 5 个，新增独立的后量子 VLESS TCP Reality 入站，使用 ML-DSA-65 配对参数并加入真实连通性验收。
+- 统一自动创建入站的备注规则为“地区-协议-传输-特性-编号”；固定生成 `US-VLESS-TCP`、`US-VLESS-TCP-01`、`US-VLESS-XHTTP`、`US-VLESS-TCP-PQ`、`US-HY2-Hop`。
+- 名称中不再写入 Reality、TLS、CDN、Argo、Brutal 或临时词；同类节点从第二个起使用 `-01`、`-02` 编号。
+
 ## v1.1.2
 
 - 所有 VLESS + Reality 入站固定 `minClientVer=1.0.0`，避免留空时 Xray Core 内置最低版本拒绝 Mihomo、sing-box 等客户端。

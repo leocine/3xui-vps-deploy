@@ -16,8 +16,9 @@
 1. VLESS TCP Reality 443。
 2. VLESS TCP Reality 随机高位端口。
 3. VLESS XHTTP Reality 随机高位端口。
-4. HY2 主端口。
-5. HY2 端口跳跃：从 `48000-50000` 中随机选择 2 个不同端口，分别使用与主端口相同的 HY2 客户端身份连接。
+4. 后量子 VLESS TCP Reality 随机高位端口；临时客户端必须读取同一入站配对的 `mldsa65Verify`。
+5. HY2 主端口。
+6. HY2 端口跳跃：从 `48000-50000` 中随机选择 2 个不同端口，分别使用与主端口相同的 HY2 客户端身份连接。
 
 使用与服务端版本兼容、来源可信的客户端。优先复用执行环境中已有的 Xray/Mihomo/Hysteria 客户端；缺少时才按各项目官方发布渠道下载临时客户端，并在测试完成后清理。不得把测试配置导入用户常用客户端或覆盖现有配置。
 
@@ -33,11 +34,12 @@
 
 - `x-ui` active。
 - Xray Core 版本已记录，且使用 3x-ui 官方稳定版随面板安装的版本。
-- 4 个入站启用。
-- `clients`/`client_inbounds` 只有一个逻辑 `admin` 并关联到 4 个入站。
+- 5 个入站启用。
+- `clients`/`client_inbounds` 只有一个逻辑 `admin` 并关联到 5 个入站。
+- 后量子 VLESS 的 `mldsa65Seed` 与订阅节点中的 `mldsa65Verify` 均存在；不要在日志或最终报告输出它们的完整值。
 - TCP/UDP 端口监听正常。
 - HY2 nftables 跳跃规则存在。
-- `/usr/local/x-ui/bin/config.json` 已包含 4 个入站端口。
+- `/usr/local/x-ui/bin/config.json` 已包含 5 个入站端口。
 
 但最终每个节点的连通性必须写为“待外部实测”，不能写“通过”。
 
@@ -51,7 +53,8 @@ timeout 30 tcpdump -ni any 'tcp port <目标TCP端口> or udp port <HY2主端口
 
 - 没有入站数据包：优先检查客户端网络、域名解析、VPS 商家安全组或商家 UDP 限制。
 - 有 TCP/UDP 入站包但握手或代理请求失败：检查对应入站参数、Reality/TLS 证书、客户端版本和防火墙/NAT 规则。
-- Mihomo 无法连接 VLESS + Reality：先检查三个 VLESS Reality 入站的 `realitySettings.minClientVer` 是否都为 `1.0.0`。不要留空；留空会使用 Xray Core 的内置最低版本，并可能拒绝 Mihomo、sing-box 等客户端。
+- Mihomo 无法连接普通 VLESS + Reality：先检查三个普通 VLESS Reality 入站的 `realitySettings.minClientVer` 是否都为 `1.0.0`。不要留空；留空会使用 Xray Core 的内置最低版本，并可能拒绝 Mihomo、sing-box 等客户端。
+- 只有后量子 VLESS 失败：确认客户端本身支持 ML-DSA-65，且该节点下发的 `mldsa65Verify` 与服务端 `mldsa65Seed` 属于同一对。兼容性不足时保留普通 VLESS 节点可用，不要删除或降低后量子入站的 ML-DSA-65 配置。
 - 如果 VLESS Reality 配置正确但多客户端不通，记录当前 Xray Core 版本与 3x-ui 版本，先按官方最新 Release / Issue 核对兼容性。不要自行降级或替换 Xray 二进制；任何面板内切换后都必须重启 `x-ui` 并重新做真实代理测试。
 - 如果 3x-ui 面板或订阅里看到的是新 UUID / Reality / flow，但客户端超时，且旧客户端或 v2rayN 仍可用，优先检查“数据库配置与 Xray 实际运行配置是否一致”。对比 `/etc/x-ui/x-ui.db` 中对应入站和 `/usr/local/x-ui/bin/config.json` 中同端口入站的客户端 UUID、flow、Reality `serverNames`、`publicKey`、`shortIds`。若不一致，执行 `systemctl restart x-ui`，确认 `config.json` 已重新生成并包含最新字段后再重测。
 - HY2 主端口通过但跳跃端口失败：检查 UDP `48000-50000` 的商家安全组、本机防火墙和 `xui_hy2_nat` nftables 规则。
@@ -64,4 +67,4 @@ timeout 30 tcpdump -ni any 'tcp port <目标TCP端口> or udp port <HY2主端口
 - `失败`：已从外部发起测试但未完成；给出失败分类和下一步自动诊断结果。
 - `待外部实测`：仅在没有独立外部执行环境且用户尚未测试时使用；绝不能写成“成功”。
 
-四个入站均通过，且 HY2 主端口和两个跳跃端口均通过，才可写“4 个入站全部实测通过”。
+五个入站均通过，且 HY2 主端口和两个跳跃端口均通过，才可写“5 个入站全部实测通过”。

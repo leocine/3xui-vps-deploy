@@ -47,11 +47,12 @@ subClashPath|/clash/
 
 如果创建了入站，确认：
 
-- 4 个入站都启用。
+- 5 个入站都启用，且名称严格为 `US-VLESS-TCP`、`US-VLESS-TCP-01`、`US-VLESS-XHTTP`、`US-VLESS-TCP-PQ`、`US-HY2-Hop`。
 - 只有一个逻辑客户端 `admin`，没有 `admin-xhttp`、`admin-vless`、`admin-hy2`、`admin01` 这类拆分客户端。
-- 4 个入站都关联到 `admin`；3 个 VLESS 入站使用同一个 `admin` 客户端 UUID。
+- 5 个入站都关联到 `admin`；4 个 VLESS 入站使用同一个 `admin` 客户端 UUID。
 - HY2 有随机 auth。
-- 3x-ui 3.6.0 还要确认 `clients` 表里只有一个逻辑 `admin`，并通过 `client_inbounds` 关联到 4 个入站；4 个关联使用同一个 `sub_id`。
+- 后量子 VLESS 的数据库和实际运行配置中都有非空的 `mldsa65Seed`，订阅下发的该节点有配对的非空 `mldsa65Verify`；不得在验收输出中泄露它们的完整值。
+- 3x-ui 3.6.0 还要确认 `clients` 表里只有一个逻辑 `admin`，并通过 `client_inbounds` 关联到 5 个入站；5 个关联使用同一个 `sub_id`。
 - 443 入站监听 `443/tcp`。
 - 随机 VLESS 入站监听对应 TCP 端口。
 - HY2 主端口监听 UDP。
@@ -61,7 +62,7 @@ subClashPath|/clash/
 检查示例：
 
 ```bash
-ss -lntup | grep -E ':(443|<随机TCP端口>|<XHTTP端口>)'
+ss -lntup | grep -E ':(443|<随机TCP端口>|<XHTTP端口>|<PQ_TCP端口>)'
 ss -lunp | grep '<HY2主端口>'
 nft list ruleset
 ```
@@ -98,10 +99,17 @@ ss -lntup | grep -E ':<端口>\b'
 
 然后再次对比 `config.json`。只有确认 Xray 实际运行配置已加载最新字段，才继续做客户端连通性测试。
 
-对 3x-ui 3.6.0，还要直接确认 4 个端口都进入实际配置：
+后量子入站还要验证 ML-DSA-65 字段已进入运行配置，但不得输出完整密钥：
 
 ```bash
-for p in 443 <随机TCP端口> <XHTTP端口> <HY2端口>; do
+sqlite3 /etc/x-ui/x-ui.db "select stream_settings from inbounds where remark='US-VLESS-TCP-PQ';" | grep -Eq '"mldsa65Seed"[[:space:]]*:[[:space:]]*"[^\"]+"'
+grep -Eq '"mldsa65Seed"[[:space:]]*:[[:space:]]*"[^\"]+"' /usr/local/x-ui/bin/config.json
+```
+
+对 3x-ui 3.6.0，还要直接确认 5 个端口都进入实际配置：
+
+```bash
+for p in 443 <随机TCP端口> <XHTTP端口> <PQ_TCP端口> <HY2端口>; do
   grep -q "\"port\": $p" /usr/local/x-ui/bin/config.json && echo "config_port_$p=present"
 done
 ```
@@ -117,6 +125,7 @@ done
 - VLESS TCP Reality 443：通过 / 失败 / 待外部实测。
 - VLESS TCP Reality 随机端口：通过 / 失败 / 待外部实测。
 - VLESS XHTTP Reality：通过 / 失败 / 待外部实测。
+- 后量子 VLESS TCP Reality：通过 / 失败 / 待外部实测。
 - HY2 主端口：通过 / 失败 / 待外部实测。
 - HY2 跳跃端口 A、B：通过 / 失败 / 待外部实测。
 
@@ -143,7 +152,7 @@ BBR/调优状态:
 - 如需要，请在 3x-ui 面板中按入站或客户端配置；本 Skill 不再部署 VPS 端重置脚本或 cron。
 
 入站创建:
-- 是否创建 4 个入站
+- 是否创建 5 个入站
 - 如已创建，列出每个入站名称、协议、端口、用途、客户端 email
 - 如已创建，逐项列出真实连通性测试结果；HY2 必须分别列出主端口和两个跳跃端口结果
 
