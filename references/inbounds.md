@@ -60,7 +60,7 @@ curl -k -H "Authorization: Bearer ${XUI_API_TOKEN}" \
 - HY2 因协议需要使用随机 `auth`，但 email 仍使用 `admin`；如果 3x-ui 支持 `subId`，也使用同一个 `admin` subId。
 - `totalGB=0`、`expiryTime=0`、`limitIp=0`。
 - TCP Reality（含后量子入站）flow: `xtls-rprx-vision`
-- XHTTP Reality flow: 空
+- XHTTP Reality 默认 flow: 空；不要从 TCP Reality 客户端配置自动复制 `xtls-rprx-vision`。如果面板或当前 Core 生成了该 flow，必须按当前 Core 版本做配置测试和真实外部连通性测试。
 - HY2 无 flow
 
 ### 3x-ui 3.6.0 客户端表结构
@@ -79,10 +79,12 @@ sqlite3 /etc/x-ui/x-ui.db ".schema client_inbounds"
 - 通过 API 新增入站时让 3x-ui 自己同步 `clients`、`client_inbounds` 和运行时配置；直接改 SQLite 时必须同时维护这些表和入站 `settings`，否则订阅、客户端页和 Xray 实际配置可能不一致。
 - 创建后检查 `clients` 只有一个逻辑 `admin`，`client_inbounds` 关联到 5 个入站，且 `flow_override` 在三个 TCP Reality 入站为 `xtls-rprx-vision`、XHTTP/HY2 为空。
 
+VLESS 的 ML-KEM-768/VLESSENC、Reality 的 ML-DSA-65，以及两者的组合配置，读取 [`references/vless-pq.md`](vless-pq.md)。首次部署仍只创建一个逻辑客户端 `admin`，不会因为启用后量子加密而按协议拆分客户端。
+
 ## VLESS 通用
 
-- `decryption=none`
-- `encryption=none`
+- 普通 VLESS 入站使用 `settings.decryption=none`，普通 VLESS 出站用户使用 `encryption=none`。
+- 如果启用 ML-KEM-768/VLESSENC，不要继续套用 `none`；服务端入站改用生成的 `settings.decryption`，客户端出站用户改用同一批次生成的 `encryption`。字段归属、生成和验收规则见 `references/vless-pq.md`。
 - `sniffing.enabled=false`
 - `fingerprint=chrome`
 
@@ -104,14 +106,16 @@ PrivateKey: <private>
 Password (PublicKey): <public>
 ```
 
-## 后量子 VLESS TCP Reality
+## Reality 附加后量子签名：ML-DSA-65
 
 - 使用独立的随机 TCP 高位端口和独立的 Reality `privateKey/publicKey`、`shortIds`。
 - `remark=US-VLESS-TCP-PQ`，并沿用 TCP Reality 的其余参数与 `xtls-rprx-vision`。
 - 在服务端 `realitySettings.mldsa65Seed` 写入当前 Xray Core 执行 `xray mldsa65` 生成的 seed；在客户端 Reality 参数 `settings.mldsa65Verify` 写入同次命令输出的 verify。两项必须是一对，不能混用或手填示例值。
 - 该入站的 `mldsa65Seed` 与 `mldsa65Verify` 都不得为空；生成或写入失败时停止创建这个入站并明确报错，不能以普通 Reality 入站冒充后量子节点。
 - 先用当前 Xray Core 的 `xray tls ping <target域名>` 检查目标站。ML-DSA-65 会增大临时证书，目标站返回的证书必须大于 3500 bytes；不满足时换一个符合条件的目标与匹配 SNI 后再创建。另记录该目标是否支持 `X25519MLKEM768`：支持时才同时具备后量子密钥协商；仅 ML-DSA-65 时仍是后量子证书签名保护，不能在交付中写成“全链路后量子”。
-- 该入站仅面向支持 ML-DSA-65 的新客户端。订阅中仍保留其他三个普通 VLESS 入站作为兼容选项。
+- 该入站仅面向支持 ML-DSA-65 的新客户端。订阅中仍保留普通 VLESS 入站和可用的 ML-KEM 兼容节点作为兼容选项。
+
+这部分只描述 Reality 的 ML-DSA-65 证书签名保护；不要把它与 VLESS `mlkem768x25519plus` 加密字段混为同一种“后量子 Reality”。
 
 ## XHTTP Reality
 
@@ -121,7 +125,7 @@ Password (PublicKey): <public>
 - `host` 留空
 - `mode=auto`
 - `xPaddingBytes=100-1000`
-- `scMaxEachPostBytes=1000000`
+- `scMaxEachPostBytes` 可选；如果 3x-ui 生成结果为空，不要强行写入 `1000000`。
 - `scMaxBufferedPosts=30`
 - `scStreamUpServerSecs=20-80`
 - `target=www.intel.com:443`
@@ -129,7 +133,7 @@ Password (PublicKey): <public>
 
 ## Reality 通用
 
-- `spiderX=/`
+- `spiderX` 使用非空路径，默认 `/` 可用；也可以使用随机短路径，但必须以 `/` 开头，并与客户端 Reality 参数保持一致。
 - `show=false`
 - `xver=0`
 - `minClientVer=1.0.0`：不要留空。留空会使用 Xray Core 的内置最低版本，可能拒绝 Mihomo、sing-box 等自报版本较低的客户端。

@@ -2,7 +2,7 @@
 
 这是一个给 Codex 使用的 Skill，用于在全新的 Debian 或 Ubuntu VPS 上部署和验收 3x-ui。
 
-它会先检查域名和 Cloudflare DNS 是否准备正确，再安装最新版 3x-ui、配置 HTTPS 与 Clash/Mihomo 订阅；可选创建 5 个常用入站（VLESS Reality、VLESS XHTTP Reality、后量子 VLESS Reality、Hysteria2），完成 HY2 端口跳跃、本机防火墙、网络调优和真实连通性验收。
+它会先检查域名和 Cloudflare DNS 是否准备正确，再安装最新版 3x-ui、配置 HTTPS 与 Clash/Mihomo 订阅；可选创建 5 个常用入站（VLESS Reality、VLESS XHTTP Reality、Reality ML-DSA-65、Hysteria2），并支持单独启用 VLESS 协议层 ML-KEM-768/VLESSENC，完成 HY2 端口跳跃、本机防火墙、网络调优和真实连通性验收。
 
 ## 使用前准备
 
@@ -50,6 +50,7 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
     ├── preflight-recovery.md        # SSH 后的系统预检、DNS 核验和失败恢复
     ├── deploy-panel.md              # 3x-ui 安装、HTTPS、订阅开关、Xray Core 和防火墙处理
     ├── inbounds.md                  # VLESS Reality、XHTTP Reality、后量子 Reality、HY2 入站与命名规则
+    ├── vless-pq.md                  # VLESS ML-KEM-768/VLESSENC 与 Reality ML-DSA-65 的分层配置和验收
     ├── tuning.md                    # IPv4 优先、BBR/FQ、内核参数和网卡队列调优
     ├── connectivity-test.md         # 真实代理连通性测试、抓包判断和故障分类
     ├── validation-delivery.md       # 安装后验收清单、运行配置一致性检查和交付格式
@@ -67,13 +68,13 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 3. **设置域名解析**：创建一个面板子域名的 A 记录，例如 `panel.example.com`，让它指向 VPS IP。代理状态必须设为 `DNS only` / 灰云；如果有同名 AAAA 记录，也会提示删除。Codex 会验证公网解析生效后再继续。
 4. **连接 VPS**：收集 VPS IP、SSH 端口、系统和面板域名。macOS 上会优先打开一个只保存在本机的文件填写临时 root 密码，避免把密码发到对话里。
 5. **安装 3x-ui 面板**：先检查系统和端口，再根据 3x-ui 官方最新文档安装面板。新版会使用官方稳定版自带且已适配的 Xray Core，不再手动降级；随后申请 HTTPS 证书、开启 Clash/Mihomo 订阅、处理 VPS 本机防火墙，并关闭 IPv6。
-6. **可选的一键入站**：你可以自己在面板中创建入站，也可以让 Codex 自动创建 5 个常用节点：443 VLESS TCP Reality、随机端口 VLESS TCP Reality、随机端口 VLESS XHTTP Reality、随机端口后量子 VLESS TCP Reality，以及带 `48000-50000` UDP 端口跳跃的 HY2。自动模式只建一个客户端 `admin`，五个节点都会归到它下面。节点名称固定遵循“地区-协议-传输-特性-编号”，例如 `US-VLESS-TCP`、`US-VLESS-TCP-01`、`US-VLESS-XHTTP`、`US-VLESS-TCP-PQ`、`US-HY2-Hop`；名称不会写入 Reality、TLS、CDN、Argo 或 Brutal。
+6. **可选的一键入站**：你可以自己在面板中创建入站，也可以让 Codex 自动创建 5 个常用节点：443 VLESS TCP Reality、随机端口 VLESS TCP Reality、随机端口 VLESS XHTTP Reality、随机端口 Reality ML-DSA-65，以及带 `48000-50000` UDP 端口跳跃的 HY2。需要 VLESS 协议层后量子加密时，按 `vless-pq.md` 单独启用 ML-KEM-768/VLESSENC；不要把它与 ML-DSA-65 混为一套字段。自动模式只建一个客户端 `admin`，五个节点都会归到它下面。节点名称固定遵循“地区-协议-传输-特性-编号”，例如 `US-VLESS-TCP`、`US-VLESS-TCP-01`、`US-VLESS-XHTTP`、`US-VLESS-TCP-PQ`、`US-HY2-Hop`；名称不会写入 Reality、TLS、CDN、Argo 或 Brutal。
 7. **自动调优**：无论你是否创建入站，都会使用 VPSing 的 TCP/BBR 调优脚本（`tcp.vpsing.de`），自动完成 IPv4 优先、BBR + FQ、内核调优和网卡多队列这 4 步。
 8. **检查是否真的可用**：会检查面板、证书、端口、端口跳跃和订阅。HY2 跳跃规则必须写入 nftables 或 iptables-persistent，并在规则重载后仍存在，避免 VPS 重启后失效。创建节点时，还会用真实的代理访问测试来确认连接成功，不会只看端口是否打开；如果 VPS 商家安全组挡住了端口，会告诉你去商家后台放行。
 9. **告诉你怎么使用**：最后会给出面板地址和登录信息，并说明如何在 3x-ui 的 `客户端 -> admin` 中取得订阅。使用 Clash Verge 时，会特别说明要先在浏览器打开订阅链接，再复制页面里的 Clash 订阅内容。
 
 ## 版本
 
-当前稳定版本：`v1.2.1`。
+当前稳定版本：`v1.2.2`。
 
 每个版本的详细更新内容见 [**Releases**](https://github.com/leocine/3xui-vps-deploy/releases)。

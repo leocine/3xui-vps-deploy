@@ -51,7 +51,7 @@ subClashPath|/clash/
 - 只有一个逻辑客户端 `admin`，没有 `admin-xhttp`、`admin-vless`、`admin-hy2`、`admin01` 这类拆分客户端。
 - 5 个入站都关联到 `admin`；4 个 VLESS 入站使用同一个 `admin` 客户端 UUID。
 - HY2 有随机 auth。
-- 后量子 VLESS 的数据库和实际运行配置中都有非空的 `mldsa65Seed`，订阅下发的该节点有配对的非空 `mldsa65Verify`；不得在验收输出中泄露它们的完整值。
+- 如果启用 Reality ML-DSA-65，数据库和实际运行配置中都有非空的 `mldsa65Seed`，订阅下发的该节点有配对的非空 `mldsa65Verify`；如果启用 VLESS ML-KEM-768，则服务端 `decryption` 和客户端/订阅 `encryption` 均存在；不得在验收输出中泄露任何完整值。
 - 3x-ui 3.6.0 还要确认 `clients` 表里只有一个逻辑 `admin`，并通过 `client_inbounds` 关联到 5 个入站；5 个关联使用同一个 `sub_id`。
 - 443 入站监听 `443/tcp`。
 - 随机 VLESS 入站监听对应 TCP 端口。
@@ -106,6 +106,15 @@ sqlite3 /etc/x-ui/x-ui.db "select stream_settings from inbounds where remark='US
 grep -Eq '"mldsa65Seed"[[:space:]]*:[[:space:]]*"[^\"]+"' /usr/local/x-ui/bin/config.json
 ```
 
+如果启用了 VLESS ML-KEM-768/VLESSENC，额外验证服务端运行配置只出现非空 `decryption` 前缀；客户端 `encryption` 必须从实际订阅或临时 Xray 出站配置验证，不能从服务端 `clients` 字段推断：
+
+```bash
+grep -Eq '"decryption"[[:space:]]*:[[:space:]]*"mlkem768x25519plus\.' /usr/local/x-ui/bin/config.json
+xray run -test -config /usr/local/x-ui/bin/config.json
+```
+
+不要把 `mldsa65Seed/Verify` 为空判定为 ML-KEM 配置失败，也不要把面板导出的入站 `settings.encryption` 原样写入 Xray 入站客户端；以运行配置和实际下发客户端配置为准。
+
 对 3x-ui 3.6.0，还要直接确认 5 个端口都进入实际配置：
 
 ```bash
@@ -125,7 +134,8 @@ done
 - VLESS TCP Reality 443：通过 / 失败 / 待外部实测。
 - VLESS TCP Reality 随机端口：通过 / 失败 / 待外部实测。
 - VLESS XHTTP Reality：通过 / 失败 / 待外部实测。
-- 后量子 VLESS TCP Reality：通过 / 失败 / 待外部实测。
+- Reality ML-DSA-65：通过 / 失败 / 待外部实测（未启用则不列出）。
+- VLESS ML-KEM-768/VLESSENC：通过 / 失败 / 待外部实测（未启用则不列出）。
 - HY2 主端口：通过 / 失败 / 待外部实测。
 - HY2 跳跃端口 A、B：通过 / 失败 / 待外部实测。
 
