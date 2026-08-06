@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.1
+
+- README 的版本说明改为直接链接到 GitHub Releases，便于查看每次中文发布说明。
+
 ## v1.2.0
 
 - 一键创建入站由 4 个扩展为 5 个，新增独立的后量子 VLESS TCP Reality 入站，使用 ML-DSA-65 配对参数并加入真实连通性验收。
