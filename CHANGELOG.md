@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.2
+
+- 区分 VLESS 协议层 ML-KEM-768/VLESSENC 与 Reality 证书层 ML-DSA-65，补充 `decryption`/`encryption` 的服务端、客户端字段归属和成对生成规则。
+- 补充 XHTTP + Reality + ML-KEM 的配置边界、XHTTP flow 兼容性、可选 padding、随机 `spiderX` 和运行配置验收。
+- 将连通性与交付验收拆分为 ML-KEM、ML-DSA 两条后量子路径，并加强导出配置中的密钥、UUID、订阅标识脱敏要求。
+
 ## v1.2.1
 
 - README 的版本说明改为直接链接到 GitHub Releases，便于查看每次中文发布说明。

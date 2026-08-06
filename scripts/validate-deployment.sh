@@ -44,6 +44,13 @@ echo "inbounds_begin"
 sqlite3 "$db" "SELECT remark,protocol,port,enable FROM inbounds ORDER BY port;"
 echo "inbounds_end"
 
+echo "vless_pq_fields_begin"
+echo "vless_mlkem_db_count=$(sqlite3 "$db" "SELECT COUNT(*) FROM inbounds WHERE protocol='vless' AND (settings LIKE '%mlkem768x25519plus%' OR stream_settings LIKE '%mlkem768x25519plus%');" 2>/dev/null || echo unavailable)"
+echo "vless_mldsa_db_count=$(sqlite3 "$db" "SELECT COUNT(*) FROM inbounds WHERE protocol='vless' AND stream_settings LIKE '%mldsa65Seed%';" 2>/dev/null || echo unavailable)"
+echo "vless_mlkem_runtime=$(grep -Eq '"decryption"[[:space:]]*:[[:space:]]*"mlkem768x25519plus\.' /usr/local/x-ui/bin/config.json && echo present || echo absent)"
+echo "vless_mldsa_runtime=$(grep -Eq '"mldsa65Seed"[[:space:]]*:[[:space:]]*"[^\"]+"' /usr/local/x-ui/bin/config.json && echo present || echo absent)"
+echo "vless_pq_fields_end"
+
 echo "tables_begin"
 sqlite3 "$db" ".tables" | tr ' ' '\n' | grep -E '^(clients|client_inbounds)$' || true
 echo "tables_end"

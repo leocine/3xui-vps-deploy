@@ -1,6 +1,6 @@
 ---
 name: 3xui-vps-deploy
-description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板。先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装官方稳定版 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP/后量子 Reality/HY2 入站、配置 HY2 端口跳跃和系统网络调优。
+description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板。先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装官方稳定版 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP、VLESS ML-KEM-768/VLESSENC、Reality ML-DSA-65/HY2 入站、配置 HY2 端口跳跃和系统网络调优。
 ---
 
 # 3x-ui VPS Deploy
@@ -52,7 +52,7 @@ SSH 用户名，默认 root:
 1. 按 `references/preflight-recovery.md` 做自动预检。预检失败时先给出明确修复动作，不继续部署。
 2. 按 `references/deploy-panel.md` 安装 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、处理本机防火墙、关闭 IPv6。配置 HTTPS 和订阅开关时优先上传并执行 `scripts/configure-panel-https.sh`。安装相关命令必须以官方最新文档 `https://docs.sanaei.dev/docs/` 为准，不使用旧教程。
 3. 面板安装完成后只询问一次是否一键创建入站：
-   - 是：按 `references/inbounds.md` 创建 5 个入站。
+   - 是：按 `references/inbounds.md` 创建 5 个入站；涉及 ML-KEM-768/VLESSENC、ML-DSA-65 或 XHTTP 组合时同时读取 `references/vless-pq.md`。
    - 否：跳过入站，直接调优。
 4. 无论是否创建入站，都按 `references/tuning.md` 执行网络调优。
 5. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
@@ -82,6 +82,8 @@ SSH 用户名，默认 root:
 - 改 3x-ui 数据库前必须备份 `/etc/x-ui/x-ui.db`。
 - 优先使用 3x-ui API；API 不方便时才直接改 SQLite。
 - 不照抄示例 UUID、Reality key、shortId、ML-DSA-65 seed/verify、HY2 auth，全部现场随机生成。
+- 明确区分 VLESS 协议层 ML-KEM-768/VLESSENC 与 Reality 证书层 ML-DSA-65；ML-KEM 只要求服务端 `decryption` 与客户端 `encryption` 成对，ML-DSA 才要求 `mldsa65Seed` 与 `mldsa65Verify` 成对。
+- 任何 3x-ui 入站导出 JSON 都视为含秘密的配置材料；不得把真实 UUID、Reality privateKey、VLESS `decryption`/`encryption`、订阅标识、XHTTP path 或 auth 原样写入仓库、日志或最终报告。示例必须先脱敏，已暴露的生产值应轮换。
 - 443 端口被占用时先停止并询问，不要强行覆盖。
 - VPS 商家后台安全组通常不能通过 SSH 修改；只自动处理 VPS 本机防火墙。若端口监听正常但外部不通，提示用户去商家后台放行端口。
 - 不保存用户 SSH 密码，不把密码写入文件、日志或最终报告。
