@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.0（待发布）
+
+- 按 3x-ui v3.9.0、配套 Xray Core v26.9.30 更新部署基线，分别记录 Skill、面板与 Core 版本；修复 Skill 版本读取误匹配面板版本的问题。
+- 新增面板原生客户端流量重置和自动续期指南，区分“长期有效、每月指定日清零流量”与“按到期日自动续期”，补充时区、首次截止时间、次数限制和回读验收；不恢复额外 VPS 重置脚本或 cron。
+- 更新 v3.9.0 客户端专用 API 与入站启用接口约束，避免用入站 JSON 更新覆盖客户端生命周期；保留默认 admin 无限流量、长期有效的行为。
+- 将 Reality 的 `minClientVer` 改为按实际服务端 Core 版本判断，补充 v3.9.0 通用 VLESS 链接的 ML-KEM 提示与 Sub-Store 2.39.2+ 转换验收；保留通用订阅多客户端流程。
+- 明确 Reality TLS ML-KEM 提示、VLESSENC 和 ML-DSA-65 是不同配置层，并补充 Sub-Store 自定义前端的 CORS 排查。
+- 验收脚本补充非交互面板版本、自动架构识别、客户端生命周期只读摘要及 PQ 端口检查；不再将密码、面板秘密路径或原始部署状态写入诊断输出。
+
 ## v1.2.2
 
 - 区分 VLESS 协议层 ML-KEM-768/VLESSENC 与 Reality 证书层 ML-DSA-65，补充 `decryption`/`encryption` 的服务端、客户端字段归属和成对生成规则。

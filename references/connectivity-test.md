@@ -54,7 +54,8 @@ timeout 30 tcpdump -ni any 'tcp port <目标TCP端口> or udp port <HY2主端口
 
 - 没有入站数据包：优先检查客户端网络、域名解析、VPS 商家安全组或商家 UDP 限制。
 - 有 TCP/UDP 入站包但握手或代理请求失败：检查对应入站参数、Reality/TLS 证书、客户端版本和防火墙/NAT 规则。
-- Mihomo 无法连接普通 VLESS + Reality：先检查三个普通 VLESS Reality 入站的 `realitySettings.minClientVer` 是否都为 `1.0.0`。不要留空；留空会使用 Xray Core 的内置最低版本，并可能拒绝 Mihomo、sing-box 等客户端。
+- Mihomo 无法连接普通 VLESS + Reality，但同源 v2rayN/Loon 正常：先按 `subscription.md` 检查原始链接和最终加载 YAML 的 ML-KEM 提示、`client-fingerprint`、转换器后端与 Mihomo Core 版本；这类差异不能仅凭面板更新或健康检查日志就归因于 VPS 故障。
+- `minClientVer` 另按实际服务端 Core 核对：v26.9.8+ 新部署可留空，v26.7.11–v26.9.7 为兼容 Mihomo/sing-box 使用 `1.0.0`。检查数据库和运行配置一致，其他 Core 版本先查官方说明；不要将所有版本强制改为 1.0.0，也不要把此字段当成 ML-KEM 开关。
 - 只有 Reality ML-DSA-65 入站失败：确认客户端本身支持 ML-DSA-65，且该节点下发的 `mldsa65Verify` 与服务端 `mldsa65Seed` 属于同一对。兼容性不足时保留普通 VLESS 节点可用，不要删除或降低 ML-DSA-65 配置。
 - 只有 VLESS ML-KEM-768 入站失败：确认客户端 Core 支持 `mlkem768x25519plus`，客户端出站用户使用同批次的 `encryption`，服务端入站使用对应的 `decryption`；不要把客户端 `encryption` 填到服务端 `clients`，也不要用 `mldsa65Verify` 代替。兼容性不足时保留普通 VLESS 节点。
 - XHTTP + Reality + `xtls-rprx-vision` 失败：先按当前 Xray Core 版本执行 `xray run -test`，再清空 XHTTP flow 做对照测试；不要仅凭面板保存成功判定可用。
@@ -63,6 +64,7 @@ timeout 30 tcpdump -ni any 'tcp port <目标TCP端口> or udp port <HY2主端口
 - HY2 主端口通过但跳跃端口失败：检查 UDP `48000-50000` 的商家安全组、本机防火墙和 `xui_hy2_nat` nftables 规则。
 - HY2 主端口通过、跳跃端口曾经可用但突然全部失败：先检查 `uptime -s`、`last reboot -F` 和 `journalctl --list-boots`。若近期重启且 NAT 规则消失，再检查规则是否只存在于历史命令、却没有写入 `/etc/nftables.conf` 或 `/etc/iptables/rules.v4`。恢复规则后必须保存并完成规则重载验收。
 - 单独复制最新 HY2 节点可用，但经 Sub-Store 或其他订阅转换后仍显示旧 `mport`、旧地址或旧参数：服务器侧配置可能已经修好，但中间订阅仍在使用缓存。必须重新拉取源订阅、刷新/重建 Sub-Store 输出，并检查最终下发内容；不能因为 3x-ui 页面已更新就假定终端收到的是新配置。
+- Sub-Store 页面报 `403 CORS origin not allowed`：按 `subscription.md` 的来源白名单核对前端 origin 和后端 Docker 环境；这不证明节点失效，不通过降级 Xray 或关闭所有安全校验解决。
 
 ## 判定规则
 

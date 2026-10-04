@@ -2,11 +2,13 @@
 
 本文件区分 VLESS 协议层的 ML-KEM-768/VLESSENC 与 Reality 证书层的 ML-DSA-65。两者可以独立启用，也可以组合启用；不能因为其中一组字段存在就宣称另一组也已启用。
 
+另有 **Reality TLS 的 X25519MLKEM768 密钥协商**：Mihomo 用 `reality-opts.support-x25519mlkem768: true` 表达支持，通用 VLESS URI 用 `support-x25519mlkem768=true` 提示转换器。它与下面的 VLESSENC、ML-DSA-65 都不是同一个开关；普通 `encryption=none` 的 VLESS 也可以使用这一 TLS 密钥协商。字段只用于支持它的客户端/订阅格式，不能写成 Xray `realitySettings.supportX25519Mlkem768`。订阅转换验收见 `subscription.md`。
+
 ## 模式矩阵
 
 | 模式 | 后量子层 | 服务端关键字段 | 客户端关键字段 | 是否要求 `mldsa65Seed/Verify` |
 | --- | --- | --- | --- | --- |
-| 普通 VLESS + Reality | 无 | `settings.decryption=none` | `users[].encryption=none` | 否 |
+| 普通 VLESS + Reality | 未启用 VLESSENC / ML-DSA；TLS 密钥协商另计 | `settings.decryption=none` | `users[].encryption=none` | 否 |
 | VLESS ML-KEM-768 + Reality | VLESS 协议层 | `settings.decryption=mlkem768x25519plus...` | `users[].encryption=mlkem768x25519plus...` | 否 |
 | VLESS + Reality ML-DSA-65 | Reality 证书签名层 | `realitySettings.mldsa65Seed` | Reality `mldsa65Verify` | 是 |
 | VLESS ML-KEM-768 + Reality ML-DSA-65 | 两层同时启用 | 同时具备上面两组服务端字段 | 同时具备上面两组客户端字段 | 是 |

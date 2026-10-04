@@ -1,9 +1,15 @@
 ---
 name: 3xui-vps-deploy
-description: 用于在全新 Debian/Ubuntu VPS 上部署 3x-ui 面板。先确认域名和 Cloudflare DNS，再通过临时 SSH 密码接入，安装官方稳定版 3x-ui、配置 HTTPS、开启 Clash/Mihomo 订阅、可选创建 VLESS Reality/XHTTP、VLESS ML-KEM-768/VLESSENC、Reality ML-DSA-65/HY2 入站、配置 HY2 端口跳跃和系统网络调优。
+description: 用于在全新 Debian/Ubuntu VPS 上部署和验收 3x-ui 面板，配置 HTTPS、Clash/Mihomo 订阅、VLESS Reality/XHTTP、VLESSENC、ML-DSA-65、HY2 端口跳跃和网络调优。也用于已有面板的客户端流量周期重置、自动续期配置，以及按实际 Xray 版本排查 Reality/Mihomo 与 Sub-Store 订阅兼容性。
 ---
 
 # 3x-ui VPS Deploy
+
+## 选择本次流程
+
+- 新 VPS 部署：执行下面的域名门禁和完整部署流程。
+- 已有面板的流量配额、每月重置或自动续期：直接读取 `references/client-lifecycle.md`，先确认目标客户端和用途；不要重新部署、收集域名或修改其他账号。
+- 已有节点的订阅/连通性排障：读取 `references/subscription.md` 与 `references/connectivity-test.md`，记录实际面板、服务端 Core、客户端 Core 和转换器版本；涉及后量子字段时再读 `references/vless-pq.md`。解释或诊断请求不等于授权修改 VPS。
 
 ## 必须先做的门禁
 
@@ -57,7 +63,7 @@ SSH 用户名，默认 root:
 4. 无论是否创建入站，都按 `references/tuning.md` 执行网络调优。
 5. 如果创建了入站，读取 `references/connectivity-test.md`，完成服务器侧验收和 VPS 外独立环境的真实代理访问测试。没有外部执行环境时，明确标记“待外部实测”，并以一次用户连接动作配合抓包诊断；不得把端口监听写成节点已通。
 6. 按 `references/validation-delivery.md` 做安装后验证并汇总测试结论。基础验收优先上传并执行 `scripts/validate-deployment.sh`，再补做 VPS 外部的真实代理连通性测试。
-7. 最后按 `references/subscription.md` 输出订阅获取方式，重点强调 Clash Verge 的复制方式；如用户需要每月流量周期重置，说明应在新版 3x-ui 面板中配置，不部署 VPS 脚本、cron 或 API Token。
+7. 按 `references/subscription.md` 输出订阅获取方式：直接使用 Mihomo 时推荐专用 Clash 链接；已有“通用订阅 → Sub-Store → 多客户端”流程时保留流程并核验转换结果。用户需要流量周期重置或自动续期时读取 `references/client-lifecycle.md`，使用面板原生设置，不部署额外重置脚本、cron 或定时任务 Token。
 8. 在最终回复前读取 `references/version-check.md`，做一次非阻塞版本检查；如果 GitHub 最新 Release/Tag 高于当前 skill 版本，提醒用户用 `skill-installer` 升级。
 
 ## 每次使用后的版本检查
@@ -81,8 +87,10 @@ SSH 用户名，默认 root:
 
 - 改 3x-ui 数据库前必须备份 `/etc/x-ui/x-ui.db`。
 - 优先使用 3x-ui API；API 不方便时才直接改 SQLite。
+- v3.9.0 的入站更新接口不再用于修改已有客户端的配额、到期、续期或启用状态；使用客户端专用接口，保存前读取完整现值，保存后回读。流量重置与自动续期是两套不同的设置。
 - 不照抄示例 UUID、Reality key、shortId、ML-DSA-65 seed/verify、HY2 auth，全部现场随机生成。
 - 明确区分 VLESS 协议层 ML-KEM-768/VLESSENC 与 Reality 证书层 ML-DSA-65；ML-KEM 只要求服务端 `decryption` 与客户端 `encryption` 成对，ML-DSA 才要求 `mldsa65Seed` 与 `mldsa65Verify` 成对。
+- Mihomo 的 `reality-opts.support-x25519mlkem768` 是 Reality TLS 密钥协商提示，不是 VLESSENC 或 ML-DSA-65 开关，也不是 Xray `realitySettings` 字段。`minClientVer` 按实际服务端 Core 版本设置，不能继续对所有版本强制 `1.0.0`。
 - 任何 3x-ui 入站导出 JSON 都视为含秘密的配置材料；不得把真实 UUID、Reality privateKey、VLESS `decryption`/`encryption`、订阅标识、XHTTP path 或 auth 原样写入仓库、日志或最终报告。示例必须先脱敏，已暴露的生产值应轮换。
 - 443 端口被占用时先停止并询问，不要强行覆盖。
 - VPS 商家后台安全组通常不能通过 SSH 修改；只自动处理 VPS 本机防火墙。若端口监听正常但外部不通，提示用户去商家后台放行端口。

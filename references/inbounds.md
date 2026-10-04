@@ -15,7 +15,7 @@ IP Limit: 不填
 cp /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.bak
 ```
 
-3x-ui 3.6.0 自动化优先调用本机面板 API：
+自动化优先调用本机面板 API：
 
 ```bash
 . /etc/x-ui/install-result.env
@@ -63,9 +63,9 @@ curl -k -H "Authorization: Bearer ${XUI_API_TOKEN}" \
 - XHTTP Reality 默认 flow: 空；不要从 TCP Reality 客户端配置自动复制 `xtls-rprx-vision`。如果面板或当前 Core 生成了该 flow，必须按当前 Core 版本做配置测试和真实外部连通性测试。
 - HY2 无 flow
 
-### 3x-ui 3.6.0 客户端表结构
+### 客户端身份、表结构与 v3.9.0 API
 
-3x-ui 3.6.0 会维护独立的 `clients` 和 `client_inbounds` 表：
+新版会维护独立的 `clients` 和 `client_inbounds` 表，先只读确认实际 schema：
 
 ```bash
 sqlite3 /etc/x-ui/x-ui.db ".schema clients"
@@ -78,6 +78,8 @@ sqlite3 /etc/x-ui/x-ui.db ".schema client_inbounds"
 - 4 个 VLESS 入站使用同一个 UUID，HY2 使用独立随机 `auth`，但仍使用同一个 `subId`。
 - 通过 API 新增入站时让 3x-ui 自己同步 `clients`、`client_inbounds` 和运行时配置；直接改 SQLite 时必须同时维护这些表和入站 `settings`，否则订阅、客户端页和 Xray 实际配置可能不一致。
 - 创建后检查 `clients` 只有一个逻辑 `admin`，`client_inbounds` 关联到 5 个入站，且 `flow_override` 在三个 TCP Reality 入站为 `xtls-rprx-vision`、XHTTP/HY2 为空。
+
+v3.9.0 新增/关联客户端可用 `/panel/api/clients/add`、`/panel/api/clients/{email}/attach`；更新已有客户端用 `/panel/api/clients/update/{email}`。创建入站的初始客户端导入是否支持，以实际版本 schema 为准；不要靠更新入站 JSON 维护已有客户端。更新是完整字段替换，不是部分 PATCH，须保留 UUID、auth、subId、配额、到期和逐入站 flow。用户要求月度配额/自动续期时读取 `client-lifecycle.md`，不要把示例的 50 GB、17 日当成默认 admin 设置。
 
 VLESS 的 ML-KEM-768/VLESSENC、Reality 的 ML-DSA-65，以及两者的组合配置，读取 [`references/vless-pq.md`](vless-pq.md)。首次部署仍只创建一个逻辑客户端 `admin`，不会因为启用后量子加密而按协议拆分客户端。
 
@@ -136,9 +138,16 @@ Password (PublicKey): <public>
 - `spiderX` 使用非空路径，默认 `/` 可用；也可以使用随机短路径，但必须以 `/` 开头，并与客户端 Reality 参数保持一致。
 - `show=false`
 - `xver=0`
-- `minClientVer=1.0.0`：不要留空。留空会使用 Xray Core 的内置最低版本，可能拒绝 Mihomo、sing-box 等自报版本较低的客户端。
+- `minClientVer` 以**实际运行的服务端 Xray Core**为准，不以面板版本推断：
+  - v26.9.8 及以上：留空表示不设最低客户端版本，新部署默认留空以兼容 Mihomo/sing-box。
+  - v26.7.11 至 v26.9.7：留空会回退到内置最低版本 26.3.27；需要兼容 Mihomo/sing-box 时使用 `1.0.0`。
+  - 其他版本先查对应官方说明，不套用以上边界。已有 `1.0.0` 且工作正常的配置不自动改动；修改版本限制须属于本次请求并重新实测。
 - `maxClientVer` 留空
 - `maxTimediff=0`
+
+这是客户端最低版本限制，不是 ML-KEM 协商开关。Mihomo 的 Reality `support-x25519mlkem768` 必须出现在最终客户端 YAML 中；不能向 Xray `realitySettings` 塞同名/驼峰伪字段。字段链路见 `subscription.md`。
+
+版本边界依据：[官方 Min Client Ver 提示修正](https://github.com/MHSanaei/3x-ui/commit/3308c816)。
 
 ## HY2
 
