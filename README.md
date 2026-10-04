@@ -88,7 +88,7 @@ Skill 会从域名、Cloudflare DNS 和 SSH 信息开始收集，按顺序完成
 
 ## 版本
 
-当前 Skill 版本：`v1.3.0`。
+当前稳定版本：`v1.3.0`。
 
 每个版本的详细更新内容见 [**Releases**](https://github.com/leocine/3xui-vps-deploy/releases)。
 
